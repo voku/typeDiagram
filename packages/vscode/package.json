@@ -2,7 +2,7 @@
   "name": "typediagram-vscode",
   "displayName": "TypeDiagram",
   "description": "TypeDiagram language support with live SVG preview",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "publisher": "nimblesite",
   "engines": {
     "vscode": "^1.75.0"
@@ -115,7 +115,7 @@
     "package": "node package-vsix.mjs"
   },
   "dependencies": {
-    "typediagram-core": "0.1.0"
+    "typediagram-core": "0.2.0"
   },
   "devDependencies": {
     "@types/vscode": "^1.75.0",
