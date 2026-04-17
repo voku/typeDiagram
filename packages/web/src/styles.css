@@ -121,6 +121,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  position: relative;
 }
 
 .nav-logo {
@@ -149,6 +150,40 @@ body {
 
 .nav-links a:hover {
   color: var(--td-primary);
+}
+
+.nav-toggle {
+  display: none;
+}
+
+.nav-burger {
+  display: none;
+  width: 28px;
+  height: 22px;
+  flex-direction: column;
+  justify-content: space-between;
+  cursor: pointer;
+  z-index: 101;
+}
+
+.nav-burger span {
+  display: block;
+  height: 2px;
+  background: var(--td-primary);
+  border-radius: 2px;
+  transition: transform var(--td-ease), opacity var(--td-ease);
+}
+
+.nav-toggle:checked ~ .nav-burger span:nth-child(1) {
+  transform: translateY(10px) rotate(45deg);
+}
+
+.nav-toggle:checked ~ .nav-burger span:nth-child(2) {
+  opacity: 0;
+}
+
+.nav-toggle:checked ~ .nav-burger span:nth-child(3) {
+  transform: translateY(-10px) rotate(-45deg);
 }
 
 /* ==========================================================================
@@ -743,8 +778,27 @@ body {
   .hero-title {
     font-size: 2rem;
   }
+  .nav-burger {
+    display: flex;
+  }
   .nav-links {
     display: none;
+    position: absolute;
+    top: 56px;
+    left: 0;
+    right: 0;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0;
+    background: var(--td-bg);
+    border-bottom: 1px solid var(--td-border);
+    padding: var(--td-space-sm) 0;
+  }
+  .nav-links a {
+    padding: var(--td-space-md) var(--td-space-xl);
+  }
+  .nav-toggle:checked ~ .nav-links {
+    display: flex;
   }
   .footer-inner {
     flex-direction: column;
@@ -766,6 +820,34 @@ body {
   .docs-sidebar {
     display: none;
   }
+  .conv-toolbar {
+    flex-wrap: wrap;
+  }
+  .conv-lang-tabs {
+    width: 100%;
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    -webkit-overflow-scrolling: touch;
+  }
+  .conv-lang-tab {
+    padding: var(--td-space-xs) var(--td-space-md);
+    flex-shrink: 0;
+  }
+  .conv-input-panel {
+    grid-template-columns: 1fr;
+    grid-template-rows: 1fr 4px 1fr;
+  }
+  .converter-mount {
+    padding: 0 var(--td-space-md) var(--td-space-2xl);
+  }
+  .conv-header {
+    padding: var(--td-space-xl) var(--td-space-md) var(--td-space-md);
+  }
+}
+
+html,
+body {
+  overflow-x: hidden;
 }
 
 /* ==========================================================================

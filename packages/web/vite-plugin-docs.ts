@@ -42,6 +42,8 @@ const docTemplate = (title: string, content: string, nav: string, base: string, 
   <nav class="nav">
     <div class="nav-inner">
       <a href="${base}" class="nav-logo"><span class="nav-logo-accent">type</span>Diagram</a>
+      <input type="checkbox" id="nav-toggle" class="nav-toggle" aria-label="Toggle navigation" />
+      <label class="nav-burger" for="nav-toggle" aria-hidden="true"><span></span><span></span><span></span></label>
       <div class="nav-links">
         <a href="${base}#playground">Playground</a>
         <a href="${base}converter.html">Converter</a>
