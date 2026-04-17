@@ -93,6 +93,40 @@ describe("[WEB-SPLITTER]", () => {
     window.dispatchEvent(new PointerEvent("pointerup", { bubbles: true }));
   });
 
+  it("uses gridTemplateRows and clientY in portrait mode", () => {
+    const original = window.matchMedia;
+    Object.defineProperty(window, "matchMedia", {
+      configurable: true,
+      writable: true,
+      value: (q: string) => ({
+        matches: true,
+        media: q,
+        onchange: null,
+        addListener: () => {},
+        removeListener: () => {},
+        addEventListener: () => {},
+        removeEventListener: () => {},
+        dispatchEvent: () => false,
+      }),
+    });
+    try {
+      initSplitter(app, handle);
+      expect(app.style.gridTemplateRows).toBe("0.5fr 4px 0.5fr");
+      expect(app.style.gridTemplateColumns).toBe("");
+      Object.defineProperty(app, "getBoundingClientRect", {
+        value: () => ({ left: 0, width: 1000, top: 0, height: 800, right: 1000, bottom: 800 }),
+      });
+      handle.dispatchEvent(new PointerEvent("pointerdown", { pointerId: 1, clientY: 400, bubbles: true }));
+      window.dispatchEvent(new PointerEvent("pointermove", { clientY: 560, bubbles: true }));
+      expect(app.style.gridTemplateRows).toBe("0.7fr 4px 0.30000000000000004fr");
+      expect(app.style.gridTemplateColumns).toBe("");
+      window.dispatchEvent(new PointerEvent("pointerup", { bubbles: true }));
+      expect(localStorage.getItem("typediagram-split")).toBe("0.7");
+    } finally {
+      Object.defineProperty(window, "matchMedia", { configurable: true, writable: true, value: original });
+    }
+  });
+
   it("updates grid on pointer drag and saves on pointerup", () => {
     initSplitter(app, handle);
     Object.defineProperty(app, "getBoundingClientRect", {

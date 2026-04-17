@@ -17,22 +17,33 @@ const saveRatio = (r: number) => {
   localStorage.setItem(STORAGE_KEY, String(r));
 };
 
+const portraitQuery = (): MediaQueryList | null =>
+  typeof window !== "undefined" && typeof window.matchMedia === "function"
+    ? window.matchMedia("(orientation: portrait), (max-width: 767px)")
+    : null;
+
 export const initSplitter = (app: HTMLElement, handle: HTMLElement) => {
   let ratio = loadRatio();
   let dragging = false;
+  const mq = portraitQuery();
+  const isPortrait = () => mq?.matches === true;
 
   const applyRatio = () => {
-    app.style.gridTemplateColumns = `${String(ratio)}fr 4px ${String(1 - ratio)}fr`;
+    const tracks = `${String(ratio)}fr 4px ${String(1 - ratio)}fr`;
+    const portrait = isPortrait();
+    app.style.gridTemplateRows = portrait ? tracks : "";
+    app.style.gridTemplateColumns = portrait ? "" : tracks;
   };
 
   applyRatio();
+  mq?.addEventListener("change", applyRatio);
 
   handle.addEventListener("pointerdown", (e) => {
     dragging = true;
     if (typeof handle.setPointerCapture === "function") {
       handle.setPointerCapture(e.pointerId);
     }
-    document.body.style.cursor = "col-resize";
+    document.body.style.cursor = isPortrait() ? "row-resize" : "col-resize";
     document.body.style.userSelect = "none";
   });
 
@@ -41,7 +52,9 @@ export const initSplitter = (app: HTMLElement, handle: HTMLElement) => {
       return;
     }
     const rect = app.getBoundingClientRect();
-    ratio = clampRatio((e.clientX - rect.left) / rect.width);
+    ratio = isPortrait()
+      ? clampRatio((e.clientY - rect.top) / rect.height)
+      : clampRatio((e.clientX - rect.left) / rect.width);
     applyRatio();
   });
 

@@ -283,13 +283,28 @@ body {
   height: 100%;
 }
 
-@media (max-width: 767px) {
+@media (orientation: portrait), (max-width: 767px) {
   .playground {
     grid-template-columns: 1fr;
     grid-template-rows: 1fr 4px 1fr;
   }
+  .playground .pane-editor {
+    order: 1;
+  }
   .playground .splitter {
     cursor: row-resize;
+    order: 2;
+  }
+  .playground .pane-preview {
+    order: 3;
+  }
+  .playground-section {
+    padding: 0 0 var(--td-space-3xl);
+  }
+  .playground-embed {
+    border-radius: 0;
+    border-left: 0;
+    border-right: 0;
   }
 }
 
