@@ -1,6 +1,6 @@
 {
   "name": "@typediagram/web",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "typeDiagram web playground — live editor that renders SVG via the framework.",
   "type": "module",
   "private": true,
@@ -13,7 +13,7 @@
   },
   "dependencies": {
     "marked": "^18.0.0",
-    "typediagram-core": "0.2.0"
+    "typediagram-core": "0.3.0"
   },
   "devDependencies": {
     "happy-dom": "^15.0.0",
