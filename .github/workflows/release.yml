@@ -85,7 +85,7 @@ jobs:
           if ! gh release view "$TAG" >/dev/null 2>&1; then
             gh release create "$TAG" --title "$TAG" --generate-notes --prerelease
           fi
-          gh release upload "$TAG" packages/vscode/*.vsix --clobber
+          gh release upload "$TAG" typediagram-*.vsix --clobber
         env:
           GH_TOKEN: ${{ github.token }}
 
