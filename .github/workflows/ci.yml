@@ -1,0 +1,54 @@
+# agent-pmo:2efd847
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+# Run every step under bash with strict fail-fast flags.
+defaults:
+  run:
+    shell: bash --noprofile --norc -eo pipefail {0}
+
+jobs:
+  ci:
+    name: CI (Node ${{ matrix.node-version }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      # fail-fast: cancel the other matrix leg the moment any leg fails.
+      fail-fast: true
+      matrix:
+        node-version: [20, 22]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      # `make ci` runs every gate fail-fast in order:
+      # fmt-check -> typecheck -> eslint -> banned-deps -> test+coverage+threshold -> build -> bundle-size.
+      # If any gate fails, later gates don't run.
+      - name: Run full CI (make ci)
+        run: make ci
+
+      - name: Upload coverage
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: coverage-report-${{ matrix.node-version }}
+          path: |
+            coverage/
+            packages/*/coverage/
+          retention-days: 7

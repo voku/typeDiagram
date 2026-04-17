@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 176 112" width="176" height="112" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13">
+<defs>
+  <marker id="td-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+    <path d="M0,0 L10,5 L0,10 z" fill="#5b6068"/>
+  </marker>
+</defs>
+<rect x="0" y="0" width="176" height="112" fill="none"/>
+<g data-decl="UserId" data-kind="alias">
+  <rect x="29" y="28" width="118" height="56" rx="6" ry="6" fill="#ffffff" stroke="#3b3f46" stroke-width="1"/>
+  <rect x="29" y="28" width="118" height="34.2" rx="6" ry="6" fill="#eef1f5" stroke="none"/>
+  <rect x="29" y="56.2" width="118" height="6" fill="#eef1f5" stroke="none"/>
+  <line x1="29" y1="62.2" x2="147" y2="62.2" stroke="#3b3f46" stroke-width="1"/>
+  <rect x="29" y="28" width="4" height="56" rx="2" ry="2" fill="#0a7a5e"/>
+  <text x="39" y="49.65" fill="#1a1d22" font-weight="600">alias UserId</text>
+  
+  <line x1="29" y1="62.2" x2="147" y2="62.2" stroke="#dadde2" stroke-width="1"/>
+<text x="39" y="77.35" fill="#1a1d22">= String</text>
+</g>
+
+</svg>

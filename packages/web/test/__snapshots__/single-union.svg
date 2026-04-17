@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 199 191" width="199" height="191" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13">
+<defs>
+  <marker id="td-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+    <path d="M0,0 L10,5 L0,10 z" fill="#5b6068"/>
+  </marker>
+</defs>
+<rect x="0" y="0" width="199" height="191" fill="none"/>
+<g data-decl="Direction" data-kind="union">
+  <rect x="29" y="28" width="141" height="135" rx="6" ry="6" fill="#ffffff" stroke="#3b3f46" stroke-width="1"/>
+  <rect x="29" y="28" width="141" height="50.2" rx="6" ry="6" fill="#f3eefa" stroke="none"/>
+  <rect x="29" y="72.2" width="141" height="6" fill="#f3eefa" stroke="none"/>
+  <line x1="29" y1="78.2" x2="170" y2="78.2" stroke="#3b3f46" stroke-width="1"/>
+  <rect x="29" y="28" width="4" height="135" rx="2" ry="2" fill="#7a4cc7"/>
+  <text x="39" y="49.65" fill="#1a1d22" font-weight="600">union Direction</text>
+  <text x="99.5" y="72.8" fill="#7a4cc7" font-size="9" font-weight="700" text-anchor="middle" font-style="italic" letter-spacing="0.08em">ONE OF</text>
+  <line x1="29" y1="78.2" x2="170" y2="78.2" stroke="#dadde2" stroke-width="1"/>
+  <line x1="29" y1="78.2" x2="170" y2="78.2" stroke="#dadde2" stroke-width="1" stroke-dasharray="4 3"/>
+<text x="39" y="93.35" fill="#1a1d22">◇ North</text>
+<line x1="29" y1="99.4" x2="170" y2="99.4" stroke="#dadde2" stroke-width="1" stroke-dasharray="4 3"/>
+<text x="39" y="114.55" fill="#1a1d22">◇ South</text>
+<line x1="29" y1="120.60000000000001" x2="170" y2="120.60000000000001" stroke="#dadde2" stroke-width="1" stroke-dasharray="4 3"/>
+<text x="39" y="135.75000000000003" fill="#1a1d22">◇ East</text>
+<line x1="29" y1="141.8" x2="170" y2="141.8" stroke="#dadde2" stroke-width="1" stroke-dasharray="4 3"/>
+<text x="39" y="156.95000000000002" fill="#1a1d22">◇ West</text>
+</g>
+
+</svg>

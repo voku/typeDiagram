@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 592 160" width="592" height="160" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13">
+<defs>
+  <marker id="td-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+    <path d="M0,0 L10,5 L0,10 z" fill="#5b6068"/>
+  </marker>
+</defs>
+<rect x="0" y="0" width="592" height="160" fill="none"/>
+<g data-decl="Email" data-kind="alias">
+  <rect x="453" y="76" width="110" height="56" rx="6" ry="6" fill="#ffffff" stroke="#3b3f46" stroke-width="1"/>
+  <rect x="453" y="76" width="110" height="34.2" rx="6" ry="6" fill="#eef1f5" stroke="none"/>
+  <rect x="453" y="104.2" width="110" height="6" fill="#eef1f5" stroke="none"/>
+  <line x1="453" y1="110.2" x2="563" y2="110.2" stroke="#3b3f46" stroke-width="1"/>
+  <rect x="453" y="76" width="4" height="56" rx="2" ry="2" fill="#0a7a5e"/>
+  <text x="463" y="97.64999999999999" fill="#1a1d22" font-weight="600">alias Email</text>
+  
+  <line x1="453" y1="110.2" x2="563" y2="110.2" stroke="#dadde2" stroke-width="1"/>
+<text x="463" y="125.35" fill="#1a1d22">= String</text>
+</g>
+<g data-decl="UserEmail" data-kind="alias">
+  <rect x="250" y="28" width="141" height="56" rx="6" ry="6" fill="#ffffff" stroke="#3b3f46" stroke-width="1"/>
+  <rect x="250" y="28" width="141" height="34.2" rx="6" ry="6" fill="#eef1f5" stroke="none"/>
+  <rect x="250" y="56.2" width="141" height="6" fill="#eef1f5" stroke="none"/>
+  <line x1="250" y1="62.2" x2="391" y2="62.2" stroke="#3b3f46" stroke-width="1"/>
+  <rect x="250" y="28" width="4" height="56" rx="2" ry="2" fill="#0a7a5e"/>
+  <text x="260" y="49.65" fill="#1a1d22" font-weight="600">alias UserEmail</text>
+  
+  <line x1="250" y1="62.2" x2="391" y2="62.2" stroke="#dadde2" stroke-width="1"/>
+<text x="260" y="77.35" fill="#1a1d22">= Email</text>
+</g>
+<g data-decl="AdminEmail" data-kind="alias">
+  <rect x="39" y="76" width="149" height="56" rx="6" ry="6" fill="#ffffff" stroke="#3b3f46" stroke-width="1"/>
+  <rect x="39" y="76" width="149" height="34.2" rx="6" ry="6" fill="#eef1f5" stroke="none"/>
+  <rect x="39" y="104.2" width="149" height="6" fill="#eef1f5" stroke="none"/>
+  <line x1="39" y1="110.2" x2="188" y2="110.2" stroke="#3b3f46" stroke-width="1"/>
+  <rect x="39" y="76" width="4" height="56" rx="2" ry="2" fill="#0a7a5e"/>
+  <text x="49" y="97.64999999999999" fill="#1a1d22" font-weight="600">alias AdminEmail</text>
+  
+  <line x1="39" y1="110.2" x2="188" y2="110.2" stroke="#dadde2" stroke-width="1"/>
+<text x="49" y="125.35" fill="#1a1d22">= UserEmail</text>
+</g>
+<polyline points="249,56 199,56 199,104 452,104" fill="none" stroke="#5b6068" stroke-width="1.5" marker-end="url(#td-arrow)" />
+
+<polyline points="38,104 28,104 28,56 249,56" fill="none" stroke="#5b6068" stroke-width="1.5" marker-end="url(#td-arrow)" />
+
+</svg>

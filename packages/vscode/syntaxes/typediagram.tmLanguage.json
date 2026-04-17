@@ -1,0 +1,69 @@
+{
+  "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+  "name": "TypeDiagram",
+  "scopeName": "source.typediagram",
+  "patterns": [
+    { "include": "#comment" },
+    { "include": "#keyword" },
+    { "include": "#type-declaration" },
+    { "include": "#punctuation" },
+    { "include": "#builtin-type" },
+    { "include": "#type-name" },
+    { "include": "#field-name" }
+  ],
+  "repository": {
+    "comment": {
+      "match": "#.*$",
+      "name": "comment.line.number-sign.typediagram"
+    },
+    "keyword": {
+      "match": "\\b(type|union|alias|typeDiagram)\\b",
+      "name": "keyword.other.typediagram"
+    },
+    "type-declaration": {
+      "match": "\\b(type|union|alias)\\s+([A-Z][A-Za-z0-9_]*)",
+      "captures": {
+        "1": { "name": "keyword.other.typediagram" },
+        "2": { "name": "entity.name.type.typediagram" }
+      }
+    },
+    "builtin-type": {
+      "match": "\\b(Bool|Int|Float|String|Bytes|Unit|List|Map|Option)\\b",
+      "name": "support.type.typediagram"
+    },
+    "type-name": {
+      "match": "\\b([A-Z][A-Za-z0-9_]*)\\b",
+      "name": "entity.name.type.typediagram"
+    },
+    "field-name": {
+      "match": "\\b([a-z_][A-Za-z0-9_]*)\\s*(?=:)",
+      "captures": {
+        "1": { "name": "variable.other.property.typediagram" }
+      }
+    },
+    "punctuation": {
+      "patterns": [
+        {
+          "match": "[<>]",
+          "name": "punctuation.definition.typeparameters.typediagram"
+        },
+        {
+          "match": "[{}]",
+          "name": "punctuation.definition.block.typediagram"
+        },
+        {
+          "match": ":",
+          "name": "punctuation.separator.key-value.typediagram"
+        },
+        {
+          "match": ",",
+          "name": "punctuation.separator.comma.typediagram"
+        },
+        {
+          "match": "=",
+          "name": "keyword.operator.assignment.typediagram"
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,328 @@
+// [CONV-GO-TEST] Go converter integration tests.
+import { describe, expect, it } from "vitest";
+import { go } from "../../src/converters/index.js";
+import { parse } from "../../src/parser/index.js";
+import { buildModel } from "../../src/model/index.js";
+import { unwrap } from "./helpers.js";
+
+describe("[CONV-GO-FROM-COMPLEX] complex Go -> typeDiagram", () => {
+  it("parses a messy Go file with structs, interfaces, aliases, and noise", () => {
+    const src =
+      `
+// Package types defines domain models.
+package types
+
+import (
+	"context"
+	"encoding/json"
+	"fmt"
+	"time"
+)
+
+// CalculateChecksum is a function — should be ignored.
+func CalculateChecksum(data []byte) uint64 {
+	var sum uint64
+	for _, b := range data {
+		sum += uint64(b)
+	}
+	return sum
+}
+
+const MaxRetries = 3
+
+var ErrNotFound = fmt.Errorf("not found")
+
+type ChatRequest struct {
+	Message     string
+	SessionID   string
+	ToolResults []ToolResult
+	Tags        []string
+	Labels      map[string]string
+	Ptr         *int64
+	Active      bool
+	Score       float64
+	Count       int64
+	Small       int8
+	Medium      int32
+	Big         uint64
+	Tiny        uint8
+	Char        rune
+	Raw         byte
+}
+
+// Process is a method on ChatRequest — noise.
+func (c ChatRequest) Process(ctx context.Context) error {
+	return nil
+}
+
+type ToolResult struct {
+	ToolCallID string ` +
+      "`" +
+      `json:"tool_call_id"` +
+      "`" +
+      `
+	Name       string ` +
+      "`" +
+      `json:"name"` +
+      "`" +
+      `
+	Content    string ` +
+      "`" +
+      `json:"content"` +
+      "`" +
+      `
+	Ok         bool   ` +
+      "`" +
+      `json:"ok"` +
+      "`" +
+      `
+}
+
+// Processor is a random interface — parsed as union.
+type Shape interface {
+	isShape()
+}
+
+type ContentItem interface {
+	Text
+	Image
+	Code
+	Divider
+}
+
+type Empty interface {}
+
+type Email = string
+type IdMap = map[string]int64
+
+// Helper function — noise.
+func MarshalJSON(v interface{}) ([]byte, error) {
+	return json.Marshal(v)
+}
+
+func init() {
+	fmt.Println("init")
+}
+
+// Receiver method on ToolResult — noise
+func (t ToolResult) Validate() bool {
+	return t.Ok
+}
+`;
+    const model = unwrap(go.fromSource(src));
+
+    // ChatRequest — 15 fields, all type mappings
+    const chat = model.decls.find((d) => d.name === "ChatRequest");
+    expect(chat?.kind).toBe("record");
+    const chatFields = chat?.kind === "record" ? chat.fields : [];
+    expect(chatFields).toHaveLength(15);
+    expect(chatFields.find((f) => f.name === "Message")?.type.name).toBe("String");
+    expect(chatFields.find((f) => f.name === "SessionID")?.type.name).toBe("String");
+    expect(chatFields.find((f) => f.name === "ToolResults")?.type.name).toBe("List");
+    expect(chatFields.find((f) => f.name === "ToolResults")?.type.args[0]?.name).toBe("ToolResult");
+    expect(chatFields.find((f) => f.name === "Tags")?.type.name).toBe("List");
+    expect(chatFields.find((f) => f.name === "Tags")?.type.args[0]?.name).toBe("String");
+    expect(chatFields.find((f) => f.name === "Labels")?.type.name).toBe("Map");
+    expect(chatFields.find((f) => f.name === "Labels")?.type.args[0]?.name).toBe("String");
+    expect(chatFields.find((f) => f.name === "Labels")?.type.args[1]?.name).toBe("String");
+    expect(chatFields.find((f) => f.name === "Ptr")?.type.name).toBe("Option");
+    expect(chatFields.find((f) => f.name === "Ptr")?.type.args[0]?.name).toBe("Int");
+    expect(chatFields.find((f) => f.name === "Active")?.type.name).toBe("Bool");
+    expect(chatFields.find((f) => f.name === "Score")?.type.name).toBe("Float");
+    expect(chatFields.find((f) => f.name === "Count")?.type.name).toBe("Int");
+    expect(chatFields.find((f) => f.name === "Small")?.type.name).toBe("Int");
+    expect(chatFields.find((f) => f.name === "Medium")?.type.name).toBe("Int");
+    expect(chatFields.find((f) => f.name === "Big")?.type.name).toBe("Int");
+    expect(chatFields.find((f) => f.name === "Tiny")?.type.name).toBe("Int");
+    expect(chatFields.find((f) => f.name === "Char")?.type.name).toBe("Int");
+    expect(chatFields.find((f) => f.name === "Raw")?.type.name).toBe("Int");
+
+    // ToolResult — 4 fields, struct tags stripped
+    const tool = model.decls.find((d) => d.name === "ToolResult");
+    expect(tool?.kind).toBe("record");
+    const toolFields = tool?.kind === "record" ? tool.fields : [];
+    expect(toolFields).toHaveLength(4);
+    expect(toolFields.find((f) => f.name === "Ok")?.type.name).toBe("Bool");
+
+    // Shape — interface with method → union
+    const shape = model.decls.find((d) => d.name === "Shape");
+    expect(shape?.kind).toBe("union");
+
+    // ContentItem — interface with embedded types → union variants
+    const ci = model.decls.find((d) => d.name === "ContentItem");
+    expect(ci?.kind).toBe("union");
+    const ciVariants = ci?.kind === "union" ? ci.variants : [];
+    expect(ciVariants).toHaveLength(4);
+    expect(ciVariants[0]?.name).toBe("Text");
+    expect(ciVariants[1]?.name).toBe("Image");
+    expect(ciVariants[2]?.name).toBe("Code");
+    expect(ciVariants[3]?.name).toBe("Divider");
+
+    // Empty — empty interface → union with Unknown fallback
+    const empty = model.decls.find((d) => d.name === "Empty");
+    expect(empty?.kind).toBe("union");
+    expect(empty?.kind === "union" ? empty.variants[0]?.name : "").toBe("Unknown");
+
+    // Aliases
+    const email = model.decls.find((d) => d.name === "Email");
+    expect(email?.kind).toBe("alias");
+    expect(email?.kind === "alias" ? email.target.name : "").toBe("String");
+
+    // IdMap — map alias (the regex picks up 'map' as a target, not perfectly)
+    expect(model.decls.find((d) => d.name === "IdMap")?.kind).toBe("alias");
+  });
+
+  it("skips aliases that collide with already-parsed struct/interface names", () => {
+    const src = `
+type Foo struct { Name string }
+type Foo = string
+`;
+    const model = unwrap(go.fromSource(src));
+    expect(model.decls.filter((d) => d.name === "Foo")).toHaveLength(1);
+    expect(model.decls[0]?.kind).toBe("record");
+  });
+
+  it("returns error on Go file with only functions", () => {
+    const src = `
+package main
+
+import "fmt"
+
+func main() { fmt.Println("hello") }
+func helper(x int) int { return x * 2 }
+`;
+    expect(go.fromSource(src).ok).toBe(false);
+  });
+});
+
+describe("[CONV-GO-TO-COMPLEX] complex typeDiagram -> Go", () => {
+  it("emits a big model with structs, interfaces, aliases, and all type mappings", () => {
+    const td = `
+type ChatRequest {
+  message: String
+  active: Bool
+  score: Float
+  count: Int
+  raw: Bytes
+  nothing: Unit
+  tags: List<String>
+  metadata: Map<String, Int>
+  maybe: Option<String>
+}
+
+type GenericThing {
+  value: String
+}
+
+union ContentItem {
+  Text { body: String, format: String }
+  Image { url: String, width: Int }
+  Divider
+}
+
+union Direction { North\n South\n East\n West }
+
+alias Email = String
+`;
+    const model = unwrap(buildModel(unwrap(parse(td))));
+    const output = go.toSource(model);
+
+    // Package declaration
+    expect(output).toContain("package types");
+
+    // ChatRequest — all type mappings
+    expect(output).toContain("type ChatRequest struct");
+    expect(output).toContain("Message string");
+    expect(output).toContain("Active bool");
+    expect(output).toContain("Score float64");
+    expect(output).toContain("Count int64");
+    expect(output).toContain("Raw []byte");
+    expect(output).toContain("Nothing struct{}");
+    expect(output).toContain("Tags []string");
+    expect(output).toContain("Metadata map[string]int64");
+    expect(output).toContain("Maybe *string");
+
+    // Field names capitalized
+    expect(output).not.toContain("\tmessage ");
+    expect(output).not.toContain("\tactive ");
+
+    // ContentItem — interface + variant structs + marker methods
+    expect(output).toContain("type ContentItem interface");
+    expect(output).toContain("isContentItem()");
+    expect(output).toContain("type Text struct");
+    expect(output).toContain("Body string");
+    expect(output).toContain("Format string");
+    expect(output).toContain("func (Text) isContentItem()");
+    expect(output).toContain("type Image struct");
+    expect(output).toContain("func (Image) isContentItem()");
+    expect(output).toContain("type Divider struct{}");
+    expect(output).toContain("func (Divider) isContentItem()");
+
+    // Direction — all unit variants
+    expect(output).toContain("type Direction interface");
+    expect(output).toContain("type North struct{}");
+    expect(output).toContain("type South struct{}");
+    expect(output).toContain("func (North) isDirection()");
+
+    // Alias
+    expect(output).toContain("type Email = string");
+  });
+});
+
+describe("[CONV-GO-RT] Go round-trip TD -> Go -> TD", () => {
+  it("round-trips a complex model preserving structure", () => {
+    const td = `
+type User {
+  name: String
+  age: Int
+  active: Bool
+  score: Float
+}
+
+type Config {
+  tags: List<String>
+  metadata: Map<String, String>
+  maybe: Option<Int>
+}
+
+union Shape {
+  Circle { radius: Float }
+  Rect { w: Float, h: Float }
+  Point
+}
+
+alias Tag = String
+`;
+    const model1 = unwrap(buildModel(unwrap(parse(td))));
+    const goCode = go.toSource(model1);
+    const model2 = unwrap(go.fromSource(goCode));
+
+    // Go emits union variants as separate structs + an interface,
+    // so re-parsing picks up: User, Config, Shape (union), Circle, Rect, Point, Tag
+    expect(model2.decls.length).toBeGreaterThanOrEqual(4);
+
+    const user = model2.decls.find((d) => d.name === "User");
+    expect(user?.kind).toBe("record");
+    const userFields = user?.kind === "record" ? user.fields : [];
+    expect(userFields).toHaveLength(4);
+    expect(userFields[0]?.type.name).toBe("String");
+    expect(userFields[1]?.type.name).toBe("Int");
+    expect(userFields[2]?.type.name).toBe("Bool");
+    expect(userFields[3]?.type.name).toBe("Float");
+
+    const cfg = model2.decls.find((d) => d.name === "Config");
+    expect(cfg?.kind).toBe("record");
+    const cfgFields = cfg?.kind === "record" ? cfg.fields : [];
+    expect(cfgFields).toHaveLength(3);
+    expect(cfgFields.find((f) => f.name === "Tags")?.type.name).toBe("List");
+    expect(cfgFields.find((f) => f.name === "Metadata")?.type.name).toBe("Map");
+    expect(cfgFields.find((f) => f.name === "Maybe")?.type.name).toBe("Option");
+
+    const shape = model2.decls.find((d) => d.name === "Shape");
+    expect(shape?.kind).toBe("union");
+
+    const tag = model2.decls.find((d) => d.name === "Tag");
+    expect(tag?.kind).toBe("alias");
+    expect(tag?.kind === "alias" ? tag.target.name : "").toBe("String");
+  });
+});

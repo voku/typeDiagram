@@ -1,0 +1,97 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 861 112" width="861" height="112" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13">
+<defs>
+  <marker id="td-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+    <path d="M0,0 L10,5 L0,10 z" fill="#5b6068"/>
+  </marker>
+</defs>
+<rect x="0" y="0" width="861" height="112" fill="none"/>
+<g data-decl="A" data-kind="record">
+  <rect x="29" y="28" width="56" height="56" rx="6" ry="6" fill="#ffffff" stroke="#3b3f46" stroke-width="1"/>
+  <rect x="29" y="28" width="56" height="34.2" rx="6" ry="6" fill="#eef1f5" stroke="none"/>
+  <rect x="29" y="56.2" width="56" height="6" fill="#eef1f5" stroke="none"/>
+  <line x1="29" y1="62.2" x2="85" y2="62.2" stroke="#3b3f46" stroke-width="1"/>
+  <rect x="29" y="28" width="4" height="56" rx="2" ry="2" fill="#1f6feb"/>
+  <text x="39" y="49.65" fill="#1a1d22" font-weight="600">A</text>
+  
+  <line x1="29" y1="62.2" x2="85" y2="62.2" stroke="#dadde2" stroke-width="1"/>
+<text x="39" y="77.35" fill="#1a1d22">x: B</text>
+</g>
+<g data-decl="B" data-kind="record">
+  <rect x="147" y="28" width="56" height="56" rx="6" ry="6" fill="#ffffff" stroke="#3b3f46" stroke-width="1"/>
+  <rect x="147" y="28" width="56" height="34.2" rx="6" ry="6" fill="#eef1f5" stroke="none"/>
+  <rect x="147" y="56.2" width="56" height="6" fill="#eef1f5" stroke="none"/>
+  <line x1="147" y1="62.2" x2="203" y2="62.2" stroke="#3b3f46" stroke-width="1"/>
+  <rect x="147" y="28" width="4" height="56" rx="2" ry="2" fill="#1f6feb"/>
+  <text x="157" y="49.65" fill="#1a1d22" font-weight="600">B</text>
+  
+  <line x1="147" y1="62.2" x2="203" y2="62.2" stroke="#dadde2" stroke-width="1"/>
+<text x="157" y="77.35" fill="#1a1d22">x: C</text>
+</g>
+<g data-decl="C" data-kind="record">
+  <rect x="265" y="28" width="56" height="56" rx="6" ry="6" fill="#ffffff" stroke="#3b3f46" stroke-width="1"/>
+  <rect x="265" y="28" width="56" height="34.2" rx="6" ry="6" fill="#eef1f5" stroke="none"/>
+  <rect x="265" y="56.2" width="56" height="6" fill="#eef1f5" stroke="none"/>
+  <line x1="265" y1="62.2" x2="321" y2="62.2" stroke="#3b3f46" stroke-width="1"/>
+  <rect x="265" y="28" width="4" height="56" rx="2" ry="2" fill="#1f6feb"/>
+  <text x="275" y="49.65" fill="#1a1d22" font-weight="600">C</text>
+  
+  <line x1="265" y1="62.2" x2="321" y2="62.2" stroke="#dadde2" stroke-width="1"/>
+<text x="275" y="77.35" fill="#1a1d22">x: D</text>
+</g>
+<g data-decl="D" data-kind="record">
+  <rect x="383" y="28" width="56" height="56" rx="6" ry="6" fill="#ffffff" stroke="#3b3f46" stroke-width="1"/>
+  <rect x="383" y="28" width="56" height="34.2" rx="6" ry="6" fill="#eef1f5" stroke="none"/>
+  <rect x="383" y="56.2" width="56" height="6" fill="#eef1f5" stroke="none"/>
+  <line x1="383" y1="62.2" x2="439" y2="62.2" stroke="#3b3f46" stroke-width="1"/>
+  <rect x="383" y="28" width="4" height="56" rx="2" ry="2" fill="#1f6feb"/>
+  <text x="393" y="49.65" fill="#1a1d22" font-weight="600">D</text>
+  
+  <line x1="383" y1="62.2" x2="439" y2="62.2" stroke="#dadde2" stroke-width="1"/>
+<text x="393" y="77.35" fill="#1a1d22">x: E</text>
+</g>
+<g data-decl="E" data-kind="record">
+  <rect x="501" y="28" width="56" height="56" rx="6" ry="6" fill="#ffffff" stroke="#3b3f46" stroke-width="1"/>
+  <rect x="501" y="28" width="56" height="34.2" rx="6" ry="6" fill="#eef1f5" stroke="none"/>
+  <rect x="501" y="56.2" width="56" height="6" fill="#eef1f5" stroke="none"/>
+  <line x1="501" y1="62.2" x2="557" y2="62.2" stroke="#3b3f46" stroke-width="1"/>
+  <rect x="501" y="28" width="4" height="56" rx="2" ry="2" fill="#1f6feb"/>
+  <text x="511" y="49.65" fill="#1a1d22" font-weight="600">E</text>
+  
+  <line x1="501" y1="62.2" x2="557" y2="62.2" stroke="#dadde2" stroke-width="1"/>
+<text x="511" y="77.35" fill="#1a1d22">x: F</text>
+</g>
+<g data-decl="F" data-kind="record">
+  <rect x="619" y="28" width="56" height="56" rx="6" ry="6" fill="#ffffff" stroke="#3b3f46" stroke-width="1"/>
+  <rect x="619" y="28" width="56" height="34.2" rx="6" ry="6" fill="#eef1f5" stroke="none"/>
+  <rect x="619" y="56.2" width="56" height="6" fill="#eef1f5" stroke="none"/>
+  <line x1="619" y1="62.2" x2="675" y2="62.2" stroke="#3b3f46" stroke-width="1"/>
+  <rect x="619" y="28" width="4" height="56" rx="2" ry="2" fill="#1f6feb"/>
+  <text x="629" y="49.65" fill="#1a1d22" font-weight="600">F</text>
+  
+  <line x1="619" y1="62.2" x2="675" y2="62.2" stroke="#dadde2" stroke-width="1"/>
+<text x="629" y="77.35" fill="#1a1d22">x: G</text>
+</g>
+<g data-decl="G" data-kind="record">
+  <rect x="737" y="28" width="95" height="56" rx="6" ry="6" fill="#ffffff" stroke="#3b3f46" stroke-width="1"/>
+  <rect x="737" y="28" width="95" height="34.2" rx="6" ry="6" fill="#eef1f5" stroke="none"/>
+  <rect x="737" y="56.2" width="95" height="6" fill="#eef1f5" stroke="none"/>
+  <line x1="737" y1="62.2" x2="832" y2="62.2" stroke="#3b3f46" stroke-width="1"/>
+  <rect x="737" y="28" width="4" height="56" rx="2" ry="2" fill="#1f6feb"/>
+  <text x="747" y="49.65" fill="#1a1d22" font-weight="600">G</text>
+  
+  <line x1="737" y1="62.2" x2="832" y2="62.2" stroke="#dadde2" stroke-width="1"/>
+<text x="747" y="77.35" fill="#1a1d22">x: String</text>
+</g>
+<polyline points="86,56 146,56" fill="none" stroke="#5b6068" stroke-width="1.5" marker-end="url(#td-arrow)" />
+<text x="116" y="52" fill="#3b3f46" font-size="11" text-anchor="middle">x</text>
+<polyline points="204,56 264,56" fill="none" stroke="#5b6068" stroke-width="1.5" marker-end="url(#td-arrow)" />
+<text x="234" y="52" fill="#3b3f46" font-size="11" text-anchor="middle">x</text>
+<polyline points="322,56 382,56" fill="none" stroke="#5b6068" stroke-width="1.5" marker-end="url(#td-arrow)" />
+<text x="352" y="52" fill="#3b3f46" font-size="11" text-anchor="middle">x</text>
+<polyline points="440,56 500,56" fill="none" stroke="#5b6068" stroke-width="1.5" marker-end="url(#td-arrow)" />
+<text x="470" y="52" fill="#3b3f46" font-size="11" text-anchor="middle">x</text>
+<polyline points="558,56 618,56" fill="none" stroke="#5b6068" stroke-width="1.5" marker-end="url(#td-arrow)" />
+<text x="588" y="52" fill="#3b3f46" font-size="11" text-anchor="middle">x</text>
+<polyline points="676,56 736,56" fill="none" stroke="#5b6068" stroke-width="1.5" marker-end="url(#td-arrow)" />
+<text x="706" y="52" fill="#3b3f46" font-size="11" text-anchor="middle">x</text>
+</svg>

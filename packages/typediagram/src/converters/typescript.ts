@@ -1,0 +1,243 @@
+// [CONV-TS] TypeScript <-> typeDiagram bidirectional converter.
+import type { Diagnostic } from "../parser/diagnostics.js";
+import { type Result, err } from "../result.js";
+import type { Model, ResolvedTypeRef } from "../model/types.js";
+import { ModelBuilder, record, union, alias } from "../model/builder.js";
+import type { Converter } from "./types.js";
+import { parseTypeRef } from "./parse-typeref.js";
+
+// ── Type mapping tables ──
+
+const TD_TO_TS: Record<string, string> = {
+  Bool: "boolean",
+  Int: "number",
+  Float: "number",
+  String: "string",
+  Bytes: "Uint8Array",
+  Unit: "void",
+  List: "Array",
+  Map: "Map",
+  Option: "undefined",
+};
+
+const TS_TO_TD: Record<string, string> = {
+  boolean: "Bool",
+  number: "Int",
+  string: "String",
+  void: "Unit",
+  Uint8Array: "Bytes",
+  Array: "List",
+  Map: "Map",
+  Record: "Map",
+  Set: "List",
+};
+
+// ── From TypeScript ──
+
+const IFACE_RE = /(?:export\s+)?interface\s+(\w+)(?:<([^>]+)>)?\s*\{([^}]*)}/g;
+const TYPE_ALIAS_HEAD_RE = /(?:export\s+)?type\s+(\w+)(?:<([^>]+)>)?\s*=\s*/g;
+const FIELD_RE = /(\w+)\??\s*:\s*(.+)/;
+
+/** Extract the RHS of a type alias, respecting braces so `;` inside `{}` is skipped. */
+const extractTypeAliasRhs = (source: string, startIdx: number): string | null => {
+  let depth = 0;
+  for (let i = startIdx; i < source.length; i++) {
+    const c = source.charAt(i);
+    depth += c === "{" ? 1 : c === "}" ? -1 : 0;
+    if (c === ";" && depth === 0) {
+      return source.slice(startIdx, i);
+    }
+  }
+  return null;
+};
+
+const parseFields = (body: string) =>
+  body
+    .split(/[;\n]/)
+    .map((l) => l.trim())
+    .filter((l) => l.length > 0 && !l.startsWith("//"))
+    .map((l) => {
+      const m = FIELD_RE.exec(l);
+      if (m === null) {
+        return null;
+      }
+      const [, name, type] = m;
+      if (name === undefined || type === undefined) {
+        return null;
+      }
+      return { name, type: mapTsType(type.replace(/;$/, "").trim()) };
+    })
+    .filter((f): f is { name: string; type: string } => f !== null);
+
+const splitTsGenericArgs = (s: string): string[] => {
+  const parts: string[] = [];
+  let depth = 0;
+  let start = 0;
+  for (let i = 0; i < s.length; i++) {
+    const c = s.charAt(i);
+    depth += c === "<" ? 1 : c === ">" ? -1 : 0;
+    if (c === "," && depth === 0) {
+      parts.push(s.slice(start, i).trim());
+      start = i + 1;
+    }
+  }
+  const last = s.slice(start).trim();
+  return last.length > 0 ? [...parts, last] : parts;
+};
+
+const mapTsType = (t: string): string => {
+  const trimmed = t
+    .replace(/\s*\|\s*undefined$/, "")
+    .replace(/\s*\|\s*null$/, "")
+    .trim();
+  const arrayMatch = /^(.+)\[\]$/.exec(trimmed);
+  if (arrayMatch?.[1] !== undefined) {
+    return `List<${mapTsType(arrayMatch[1])}>`;
+  }
+  const angleBracket = trimmed.indexOf("<");
+  if (angleBracket !== -1) {
+    const baseName = trimmed.slice(0, angleBracket);
+    const mapped = TS_TO_TD[baseName] ?? baseName;
+    const inner = trimmed.slice(angleBracket + 1, trimmed.lastIndexOf(">"));
+    const args = splitTsGenericArgs(inner).map(mapTsType);
+    return `${mapped}<${args.join(", ")}>`;
+  }
+  return TS_TO_TD[trimmed] ?? trimmed;
+};
+
+const VARIANT_FIELD_RE = /(\w+)\s*:\s*(.+)/;
+
+const parseUnionVariant = (objectLiteral: string) => {
+  const inner = objectLiteral.replace(/^\{/, "").replace(/}$/, "").trim();
+  const entries = inner
+    .split(";")
+    .map((s) => s.trim())
+    .filter((s) => s.length > 0);
+  let variantName = objectLiteral;
+  const fields: Array<{ name: string; type: ReturnType<typeof parseTypeRef> }> = [];
+  for (const entry of entries) {
+    const fm = VARIANT_FIELD_RE.exec(entry);
+    if (fm === null) {
+      continue;
+    }
+    const [, fieldName, rawType] = fm;
+    if (fieldName === undefined || rawType === undefined) {
+      continue;
+    }
+    const fieldType = rawType.trim();
+    const isDiscriminant = fieldName === "kind" || fieldName === "type" || fieldName === "tag";
+    if (isDiscriminant) {
+      variantName = fieldType.replace(/^["']/, "").replace(/["']$/, "");
+    } else {
+      fields.push({ name: fieldName, type: parseTypeRef(mapTsType(fieldType)) });
+    }
+  }
+  return { name: variantName, fields };
+};
+
+const tsGenerics = (s: string | undefined): string[] =>
+  s !== undefined && s.length > 0
+    ? s.split(",").map((g) => {
+        const [first] = g.trim().split(/\s/);
+        return first ?? g.trim();
+      })
+    : [];
+
+const fromTypeScript = (source: string): Result<Model, Diagnostic[]> => {
+  const builder = new ModelBuilder();
+  let found = false;
+
+  IFACE_RE.lastIndex = 0;
+  let m: RegExpExecArray | null;
+  while ((m = IFACE_RE.exec(source)) !== null) {
+    const [, name, gens, body] = m;
+    if (name === undefined || body === undefined) {
+      continue;
+    }
+    found = true;
+    const fields = parseFields(body).map((f) => ({ name: f.name, type: parseTypeRef(f.type) }));
+    builder.add(record(name, fields, tsGenerics(gens)));
+  }
+
+  TYPE_ALIAS_HEAD_RE.lastIndex = 0;
+  while ((m = TYPE_ALIAS_HEAD_RE.exec(source)) !== null) {
+    const [, name, gens] = m;
+    if (name === undefined) {
+      continue;
+    }
+    const rhsRaw = extractTypeAliasRhs(source, m.index + m[0].length);
+    if (rhsRaw === null) {
+      continue;
+    }
+    found = true;
+    const rhs = rhsRaw.trim();
+
+    const parts = rhs
+      .split("|")
+      .map((p) => p.trim())
+      .filter((p) => p.length > 0);
+    const allLiterals = parts.every((p) => /^["']/.test(p));
+    const isUnion = parts.length > 1 && !allLiterals;
+
+    if (isUnion) {
+      builder.add(
+        union(
+          name,
+          parts.map((p) => {
+            const trimmedPart = p.trim();
+            const isObject = trimmedPart.startsWith("{");
+            return isObject ? parseUnionVariant(trimmedPart) : { name: mapTsType(trimmedPart), fields: [] };
+          }),
+          tsGenerics(gens)
+        )
+      );
+    } else {
+      builder.add(alias(name, parseTypeRef(mapTsType(rhs)), tsGenerics(gens)));
+    }
+  }
+
+  return found
+    ? builder.build()
+    : err([{ severity: "error", message: "No TypeScript type definitions found", line: 0, col: 0, length: 0 }]);
+};
+
+// ── To TypeScript ──
+
+const mapTdToTs = (t: ResolvedTypeRef): string => {
+  const name = TD_TO_TS[t.name] ?? t.name;
+  return t.args.length === 0 ? name : `${name}<${t.args.map(mapTdToTs).join(", ")}>`;
+};
+
+const toTypeScript = (model: Model): string => {
+  const lines: string[] = [];
+
+  for (const d of model.decls) {
+    const genericsStr = d.generics.length > 0 ? `<${d.generics.join(", ")}>` : "";
+
+    if (d.kind === "record") {
+      lines.push(`export interface ${d.name}${genericsStr} {`);
+      for (const f of d.fields) {
+        lines.push(`  ${f.name}: ${mapTdToTs(f.type)};`);
+      }
+      lines.push("}", "");
+    } else if (d.kind === "union") {
+      const variants = d.variants.map((v) => {
+        if (v.fields.length === 0) {
+          return `{ kind: "${v.name}" }`;
+        }
+        return `{ kind: "${v.name}"; ${v.fields.map((f) => `${f.name}: ${mapTdToTs(f.type)}`).join("; ")} }`;
+      });
+      lines.push(`export type ${d.name}${genericsStr} =`, `  | ${variants.join("\n  | ")};`, "");
+    } else {
+      lines.push(`export type ${d.name}${genericsStr} = ${mapTdToTs(d.target)};`, "");
+    }
+  }
+
+  return lines.join("\n");
+};
+
+export const typescript: Converter = {
+  language: "typescript",
+  fromSource: fromTypeScript,
+  toSource: toTypeScript,
+};

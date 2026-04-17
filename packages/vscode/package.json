@@ -1,0 +1,129 @@
+{
+  "name": "typediagram-vscode",
+  "displayName": "TypeDiagram",
+  "description": "TypeDiagram language support with live SVG preview",
+  "version": "0.1.0",
+  "publisher": "nimblesite",
+  "engines": {
+    "vscode": "^1.75.0"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Nimblesite/typeDiagram.git",
+    "directory": "packages/vscode"
+  },
+  "categories": [
+    "Programming Languages",
+    "Visualization"
+  ],
+  "icon": "icons/icon.png",
+  "main": "./dist/extension.js",
+  "contributes": {
+    "languages": [
+      {
+        "id": "typediagram",
+        "aliases": [
+          "TypeDiagram",
+          "typediagram"
+        ],
+        "extensions": [
+          ".td",
+          ".typediagram"
+        ],
+        "configuration": "./language-configuration.json",
+        "icon": {
+          "light": "./icons/icon.png",
+          "dark": "./icons/icon.png"
+        }
+      }
+    ],
+    "grammars": [
+      {
+        "language": "typediagram",
+        "scopeName": "source.typediagram",
+        "path": "./syntaxes/typediagram.tmLanguage.json"
+      }
+    ],
+    "themes": [
+      {
+        "label": "TypeDiagram Light",
+        "uiTheme": "vs",
+        "path": "./themes/typediagram-light.json"
+      },
+      {
+        "label": "TypeDiagram Dark",
+        "uiTheme": "vs-dark",
+        "path": "./themes/typediagram-dark.json"
+      }
+    ],
+    "commands": [
+      {
+        "command": "typediagram.preview",
+        "title": "TypeDiagram: Open Preview",
+        "icon": "$(open-preview)"
+      },
+      {
+        "command": "typediagram.openAsDiagram",
+        "title": "Display As Diagram",
+        "category": "TypeDiagram"
+      }
+    ],
+    "menus": {
+      "editor/title": [
+        {
+          "when": "resourceLangId == typediagram",
+          "command": "typediagram.preview",
+          "group": "navigation"
+        }
+      ],
+      "explorer/context": [
+        {
+          "when": "resourceExtname == .td || resourceExtname == .typediagram",
+          "command": "typediagram.openAsDiagram",
+          "group": "navigation@1"
+        }
+      ],
+      "commandPalette": [
+        {
+          "when": "resourceLangId == typediagram",
+          "command": "typediagram.preview"
+        },
+        {
+          "when": "resourceLangId == typediagram",
+          "command": "typediagram.openAsDiagram"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "TypeDiagram",
+      "properties": {
+        "typediagram.autoOpenPreview": {
+          "type": "boolean",
+          "default": true,
+          "description": "Automatically open the SVG preview beside the editor when a .td file is opened."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "build": "node esbuild.mjs",
+    "typecheck": "tsc -p tsconfig.build.json --noEmit && tsc -p tsconfig.webview.json --noEmit",
+    "test": "vitest run --coverage",
+    "test:watch": "vitest",
+    "vscode:prepublish": "node esbuild.mjs --production",
+    "package": "node package-vsix.mjs"
+  },
+  "dependencies": {
+    "typediagram-core": "0.1.0"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.75.0",
+    "@types/node": "^22.0.0",
+    "esbuild": "^0.24.0",
+    "typescript": "^5.6.0",
+    "vitest": "^2.1.0",
+    "vscode-textmate": "^9.1.0",
+    "vscode-oniguruma": "^2.0.1"
+  }
+}

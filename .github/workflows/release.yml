@@ -1,0 +1,152 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  version:
+    name: Sync versions
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    outputs:
+      version: ${{ steps.derive.outputs.version }}
+      npm_tag: ${{ steps.derive.outputs.npm_tag }}
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: main
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Derive version from tag
+        id: derive
+        run: |
+          TAG="${GITHUB_REF#refs/tags/}"
+          VERSION="${TAG#v}"
+          if [[ ! "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?$ ]]; then
+            echo "Tag $TAG is not semver (expected vMAJOR.MINOR.PATCH[-PRERELEASE])" >&2
+            exit 1
+          fi
+          NPM_TAG=latest
+          if [[ "$VERSION" == *-* ]]; then NPM_TAG=beta; fi
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "npm_tag=$NPM_TAG" >> "$GITHUB_OUTPUT"
+
+      - name: Set versions in all packages
+        run: |
+          node -e "
+            const fs = require('fs');
+            const version = process.env.VERSION;
+            const pkgs = ['packages/typediagram/package.json', 'packages/cli/package.json', 'packages/vscode/package.json', 'packages/web/package.json'];
+            for (const p of pkgs) {
+              if (!fs.existsSync(p)) continue;
+              const j = JSON.parse(fs.readFileSync(p, 'utf8'));
+              j.version = version;
+              if (j.dependencies && j.dependencies['typediagram-core']) j.dependencies['typediagram-core'] = version;
+              fs.writeFileSync(p, JSON.stringify(j, null, 2) + '\n');
+            }
+          "
+        env:
+          VERSION: ${{ steps.derive.outputs.version }}
+
+      - run: npm install --package-lock-only
+
+      - name: Commit version bump to main
+        run: |
+          VERSION="${{ steps.derive.outputs.version }}"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add package-lock.json packages/*/package.json
+          if git diff --cached --quiet; then
+            echo "No version changes to commit"
+          else
+            git commit -m "chore: release v$VERSION"
+            git push origin main
+          fi
+
+  build-and-publish:
+    name: Build and publish
+    needs: version
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: write
+      id-token: write
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          registry-url: https://registry.npmjs.org
+
+      - name: Apply tag version to package files
+        run: |
+          node -e "
+            const fs = require('fs');
+            const version = process.env.VERSION;
+            const pkgs = ['packages/typediagram/package.json', 'packages/cli/package.json', 'packages/vscode/package.json', 'packages/web/package.json'];
+            for (const p of pkgs) {
+              if (!fs.existsSync(p)) continue;
+              const j = JSON.parse(fs.readFileSync(p, 'utf8'));
+              j.version = version;
+              if (j.dependencies && j.dependencies['typediagram-core']) j.dependencies['typediagram-core'] = version;
+              fs.writeFileSync(p, JSON.stringify(j, null, 2) + '\n');
+            }
+          "
+        env:
+          VERSION: ${{ needs.version.outputs.version }}
+
+      - run: npm install --package-lock-only
+      - run: npm ci
+
+      - name: Format check
+        run: make fmt CHECK=1
+
+      - name: Lint
+        run: make lint
+
+      - name: Test
+        run: make test
+
+      - name: Build
+        run: make build
+
+      - run: npm run -w typediagram build
+
+      - name: Publish typediagram-core
+        run: npm publish --workspace=packages/typediagram --tag ${{ needs.version.outputs.npm_tag }} --provenance --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Publish typediagram CLI
+        run: npm publish --workspace=packages/cli --tag ${{ needs.version.outputs.npm_tag }} --provenance --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Package VSIX
+        run: npm run -w typediagram-vscode package -- --pre-release
+
+      - name: Create GitHub Release and attach VSIX
+        run: |
+          TAG="${GITHUB_REF#refs/tags/}"
+          if ! gh release view "$TAG" >/dev/null 2>&1; then
+            gh release create "$TAG" --title "$TAG" --generate-notes --prerelease
+          fi
+          gh release upload "$TAG" packages/vscode/*.vsix --clobber
+        env:
+          GH_TOKEN: ${{ github.token }}

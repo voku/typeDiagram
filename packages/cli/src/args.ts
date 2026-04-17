@@ -1,0 +1,149 @@
+// [CLI-ARGS] Parse argv for typediagram CLI.
+import type { Result } from "./result.js";
+import { err, ok } from "./result.js";
+
+export type Theme = "light" | "dark";
+export type Lang = "typescript" | "python" | "rust" | "go" | "csharp";
+export type Emit = "svg" | "td" | "td+svg";
+
+export interface CliArgs {
+  readonly file: string | null;
+  readonly theme: Theme;
+  readonly fontSize: number | null;
+  readonly from: Lang | null;
+  readonly to: Lang | null;
+  readonly emit: Emit;
+  readonly help: boolean;
+}
+
+export interface ArgError {
+  readonly message: string;
+}
+
+const THEMES: ReadonlySet<Theme> = new Set<Theme>(["light", "dark"]);
+const LANGS: ReadonlySet<Lang> = new Set<Lang>(["typescript", "python", "rust", "go", "csharp"]);
+const EMITS: ReadonlySet<Emit> = new Set<Emit>(["svg", "td", "td+svg"]);
+
+const isTheme = (v: string): v is Theme => THEMES.has(v as Theme);
+const isLang = (v: string): v is Lang => LANGS.has(v as Lang);
+const isEmit = (v: string): v is Emit => EMITS.has(v as Emit);
+
+const parseFontSize = (v: string): Result<number, ArgError> => {
+  const n = Number(v);
+  return Number.isFinite(n) && n > 0 ? ok(n) : err({ message: `--font-size expects positive number, got ${v}` });
+};
+
+export const parseArgs = (argv: readonly string[]): Result<CliArgs, ArgError> => {
+  const state = {
+    file: null as string | null,
+    theme: "light" as Theme,
+    fontSize: null as number | null,
+    from: null as Lang | null,
+    to: null as Lang | null,
+    emit: "svg" as Emit,
+    help: false,
+  };
+  const it = argv[Symbol.iterator]();
+  let cur = it.next();
+  while (cur.done !== true) {
+    const a = cur.value;
+    const next = () => {
+      cur = it.next();
+      return cur.done === true ? null : cur.value;
+    };
+    const res = applyArg(a, next, state);
+    if (!res.ok) {
+      return res;
+    }
+    cur = it.next();
+  }
+  return state.from !== null && state.to !== null
+    ? err({ message: "--from and --to are mutually exclusive" })
+    : ok(state);
+};
+
+const applyArg = (
+  a: string,
+  next: () => string | null,
+  s: {
+    file: string | null;
+    theme: Theme;
+    fontSize: number | null;
+    from: Lang | null;
+    to: Lang | null;
+    emit: Emit;
+    help: boolean;
+  }
+): Result<true, ArgError> =>
+  a === "-h" || a === "--help"
+    ? ((s.help = true), ok(true as const))
+    : a === "--theme"
+      ? applyTheme(next(), s)
+      : a === "--font-size"
+        ? applyFontSize(next(), s)
+        : a === "--from"
+          ? applyLang(next(), s, "from")
+          : a === "--to"
+            ? applyLang(next(), s, "to")
+            : a === "--emit"
+              ? applyEmit(next(), s)
+              : a.startsWith("-")
+                ? err({ message: `unknown flag: ${a}` })
+                : s.file !== null
+                  ? err({ message: `unexpected positional arg: ${a}` })
+                  : ((s.file = a), ok(true as const));
+
+const applyTheme = (v: string | null, s: { theme: Theme }): Result<true, ArgError> =>
+  v === null
+    ? err({ message: "--theme expects a value" })
+    : isTheme(v)
+      ? ((s.theme = v), ok(true as const))
+      : err({ message: `--theme expects light|dark, got ${v}` });
+
+const applyFontSize = (v: string | null, s: { fontSize: number | null }): Result<true, ArgError> => {
+  if (v === null) {
+    return err({ message: "--font-size expects a value" });
+  }
+  const r = parseFontSize(v);
+  return r.ok ? ((s.fontSize = r.value), ok(true as const)) : r;
+};
+
+const applyLang = (
+  v: string | null,
+  s: { from: Lang | null; to: Lang | null },
+  key: "from" | "to"
+): Result<true, ArgError> =>
+  v === null
+    ? err({ message: `--${key} expects typescript|python|rust|go|csharp` })
+    : isLang(v)
+      ? ((s[key] = v), ok(true as const))
+      : err({
+          message: `--${key} expects typescript|python|rust|go|csharp, got ${v}`,
+        });
+
+const applyEmit = (v: string | null, s: { emit: Emit }): Result<true, ArgError> =>
+  v === null
+    ? err({ message: "--emit expects svg|td|td+svg" })
+    : isEmit(v)
+      ? ((s.emit = v), ok(true as const))
+      : err({ message: `--emit expects svg|td|td+svg, got ${v}` });
+
+export const HELP_TEXT = `typediagram — render typeDiagram DSL to SVG, or convert between languages
+
+Usage:
+  typediagram [options] [file]
+
+Options:
+  --from typescript|python|rust|go|csharp   Convert from language source to SVG
+  --to   typescript|python|rust|go|csharp   Convert from typeDiagram to language source
+  --emit svg|td|td+svg              Output format for --from (default: svg)
+  --theme light|dark                 Color theme (default: light)
+  --font-size N                      Font size in px
+  -h, --help                         Show this help
+
+If file is omitted, reads from stdin.
+SVG (or language source with --to) is written to stdout.
+With --emit td, outputs the intermediate typeDiagram source.
+With --emit td+svg, outputs typeDiagram source then a --- separator then SVG.
+Errors go to stderr; exit code 1 on failure.
+`;
