@@ -8,6 +8,24 @@
 
 The full thing runs in your browser. Playground, converter, docs — all live. Paste a schema, get a diagram. Paste TypeScript, get a diagram. Export SVG. Done.
 
+## VS Code extension ★★★★★
+
+![TypeDiagram VS Code extension with live SVG preview](docs/vscode-screenshot.png)
+
+Live SVG preview, syntax highlighting, and hover docs — right next to your schema.
+
+**Install:**
+
+- **Marketplace:** [marketplace.visualstudio.com/items?itemName=Nimblesite.typediagram](https://marketplace.visualstudio.com/items?itemName=Nimblesite.typediagram)
+- **Rate it:** [leave a 5-star review](https://marketplace.visualstudio.com/items?itemName=Nimblesite.typediagram&ssr=false#review-details)
+- **VSIX download:** [typediagram.vsix](docs/typediagram.vsix)
+
+**Install the .vsix manually:**
+
+1. Download [`typediagram.vsix`](docs/typediagram.vsix).
+2. In VS Code, press `Ctrl+Shift+P` / `Cmd+Shift+P` and run **Extensions: Install from VSIX…**, then pick the file.
+3. Or from a terminal: `code --install-extension typediagram.vsix`
+
 ## Install
 
 ```sh

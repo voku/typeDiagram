@@ -79,13 +79,18 @@ jobs:
       - name: Package VSIX
         run: npm run -w typediagram-vscode package -- --pre-release
 
-      - name: Create GitHub Release and attach VSIX
+      - name: Pack npm tarballs for release assets
+        run: |
+          npm pack --workspace=packages/typediagram --pack-destination=.
+          npm pack --workspace=packages/cli --pack-destination=.
+
+      - name: Create GitHub Release and attach assets
         run: |
           TAG="${GITHUB_REF#refs/tags/}"
           if ! gh release view "$TAG" >/dev/null 2>&1; then
             gh release create "$TAG" --title "$TAG" --generate-notes --prerelease
           fi
-          gh release upload "$TAG" typediagram-*.vsix --clobber
+          gh release upload "$TAG" typediagram-*.vsix typediagram-core-*.tgz typediagram-*.tgz --clobber
         env:
           GH_TOKEN: ${{ github.token }}
 
