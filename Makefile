@@ -53,7 +53,10 @@ test:
 	node scripts/ratchet-coverage.mjs
 
 ## lint: Run all linters/analyzers (read-only). Does NOT format. Fails fast on first error.
+## Builds typediagram-core first so consumer packages can resolve its types.
 lint: fmt-check
+	@echo "==> Pre-building typediagram-core (needed for consumer typecheck)..."
+	npm run -w typediagram-core build
 	@echo "==> Typechecking..."
 	npm run -ws --if-present typecheck
 	@$(MAKE) eslint
