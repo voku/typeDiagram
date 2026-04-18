@@ -4,20 +4,21 @@ import { converters, model, parser } from "typediagram-core";
 import type { SupportedLang } from "../src/converter-render.js";
 import { SAMPLES, TD_SAMPLE } from "../src/converter.js";
 
+const BASE_EXPECTED = ["ChatRequest", "ChatTurnInput", "ToolResult", "TextPart", "UriPart"] as const;
+const UNION_EXPECTED = [...BASE_EXPECTED, "ContentItem", "UriKind"] as const;
+
 const EXPECTED_BY_LANG: Record<SupportedLang, readonly string[]> = {
-  typescript: ["ChatRequest", "ChatTurnInput", "ToolResult", "TextPart", "UriPart", "ContentItem", "UriKind"],
-  rust: ["ChatRequest", "ChatTurnInput", "ToolResult", "TextPart", "UriPart", "ContentItem", "UriKind"],
-  python: ["ChatRequest", "ChatTurnInput", "ToolResult", "TextPart", "UriPart", "UriKind"],
-  go: ["ChatRequest", "ChatTurnInput", "ToolResult", "TextPart", "UriPart", "ContentItem", "UriKind"],
-  csharp: ["ChatRequest", "ChatTurnInput", "ToolResult", "TextPart", "UriPart", "ContentItem", "UriKind"],
-  fsharp: ["ChatRequest", "ChatTurnInput", "ToolResult", "TextPart", "UriPart", "ContentItem", "UriKind"],
-  php: ["ChatRequest", "ChatTurnInput", "ToolResult", "TextPart", "UriPart", "ContentItem", "UriKind"],
+  typescript: UNION_EXPECTED,
+  rust: UNION_EXPECTED,
+  python: [...BASE_EXPECTED, "UriKind"],
+  go: UNION_EXPECTED,
+  csharp: UNION_EXPECTED,
+  fsharp: UNION_EXPECTED,
+  php: UNION_EXPECTED,
 };
 
 const assertDeclNames = (names: readonly string[], expected: readonly string[]) => {
-  for (const decl of expected) {
-    expect(names).toContain(decl);
-  }
+  expect([...names].sort()).toEqual([...expected].sort());
 };
 
 describe("[WEB-CONV-SAMPLES] converter page seed content", () => {
