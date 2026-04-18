@@ -1,4 +1,4 @@
-# agent-pmo:2efd847
+# agent-pmo:02a321a
 # =============================================================================
 # UNIVERSAL
 # =============================================================================
@@ -73,3 +73,9 @@ build/
 # =============================================================================
 packages/typediagram/logs/
 .ruff_cache/
+packages/web/.eleventy-out/
+packages/web/.typedoc-out/
+
+# Repo-root screenshot PNGs (kept for README but not accidentally re-added elsewhere)
+/*.png
+dist-test-pdfs/

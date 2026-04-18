@@ -5,8 +5,8 @@
   "projects": {
     "packages/typediagram": {
       "statements": 95,
-      "branches": 90.47,
-      "functions": 98.41,
+      "branches": 90.76,
+      "functions": 98.5,
       "lines": 95
     },
     "packages/cli": {
@@ -16,14 +16,14 @@
       "lines": 96.71
     },
     "packages/web": {
-      "statements": 95,
-      "branches": 95.84,
-      "functions": 97.21,
-      "lines": 95
+      "statements": 95.43,
+      "branches": 95.86,
+      "functions": 97.36,
+      "lines": 95.43
     },
     "packages/vscode": {
       "statements": 99,
-      "branches": 96.77,
+      "branches": 98.41,
       "functions": 99,
       "lines": 99
     }

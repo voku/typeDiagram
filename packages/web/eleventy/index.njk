@@ -1,0 +1,201 @@
+---
+layout: base.njk
+title: typeDiagram — Type-safe diagrams and source code from one schema
+description: typeDiagram is an open-source DSL that turns one .td file into TypeScript, Python, Rust, Go, C# types and an SVG diagram. Keep DTOs in sync across languages.
+permalink: /index.html
+scriptSrc: /src/main.ts
+navLogoLink: false
+navPlaygroundHref: "#playground"
+navConverterHref: /converter.html
+navDocsHref: /docs/
+navBlogHref: /blog/
+stylesHref: /src/styles.css
+structuredData:
+  "@context": "https://schema.org"
+  "@graph":
+    - "@type": "Organization"
+      "@id": "https://typediagram.dev/#organization"
+      name: "typeDiagram"
+      url: "https://typediagram.dev/"
+      logo: "https://typediagram.dev/vscode-screenshot.png"
+      sameAs:
+        - "https://github.com/Nimblesite/typeDiagram"
+        - "https://marketplace.visualstudio.com/items?itemName=Nimblesite.typediagram"
+    - "@type": "WebSite"
+      "@id": "https://typediagram.dev/#website"
+      url: "https://typediagram.dev/"
+      name: "typeDiagram"
+      publisher:
+        "@id": "https://typediagram.dev/#organization"
+    - "@type": "SoftwareApplication"
+      name: "typeDiagram"
+      operatingSystem: "Cross-platform (Node.js, VS Code, Web)"
+      applicationCategory: "DeveloperApplication"
+      description: "Language-neutral DSL that generates TypeScript, Python, Rust, Go, and C# types plus SVG diagrams from a single .td file."
+      url: "https://typediagram.dev/"
+      downloadUrl: "https://marketplace.visualstudio.com/items?itemName=Nimblesite.typediagram"
+      offers:
+        "@type": "Offer"
+        price: "0"
+        priceCurrency: "USD"
+---
+<!-- ===== Hero ===== -->
+<main class="main-content">
+  <header class="hero">
+    <h1 class="hero-title">Type-safe diagrams and source code from <span class="hero-accent">one schema.</span></h1>
+    <p class="hero-sub">
+      Define your domain once. Generate types for TypeScript, Python, Rust, Go, C#, and F# —
+      and an auto-laid-out SVG diagram — from the same source.
+    </p>
+  </header>
+
+  <!-- ===== Split Pane Editor ===== -->
+  <section class="playground-section" id="playground">
+    <div class="playground-embed">
+      <div class="editor-header">
+        <div class="editor-header-left">
+          <div class="traffic-lights">
+            <span class="dot dot--red"></span>
+            <span class="dot dot--yellow"></span>
+            <span class="dot dot--green"></span>
+          </div>
+          <span class="file-tab">Schema.td</span>
+        </div>
+        <div class="editor-header-right">
+          <span class="sync-label">Live Preview: Syncing</span>
+          <span class="material-symbols-outlined share-icon">share</span>
+        </div>
+      </div>
+      <div id="playground-mount" class="playground-mount"></div>
+    </div>
+  </section>
+
+  <!-- ===== Feature Grid ===== -->
+  <section class="features" id="features">
+    <div class="features-inner">
+      <h2 class="section-title">One <code>.td</code> file in. Three outputs out.</h2>
+      <p class="section-lede">
+        typeDiagram is a tiny, language-neutral DSL for describing <strong>algebraic data types</strong> — records,
+        tagged unions, generics, aliases.
+      </p>
+      <div class="features-grid">
+        <div class="feature-card feature-card--record">
+          <span class="material-symbols-outlined feature-icon feature-icon--record">code</span>
+          <h3 class="feature-title">Source code, 5 languages</h3>
+          <p class="feature-desc">
+            TypeScript, Python, Rust, Go, and C# — DTOs, data classes, discriminated unions, pattern-matchable
+            enums — generated from the same definition, always in sync.
+          </p>
+        </div>
+
+        <div class="feature-card feature-card--union">
+          <span class="material-symbols-outlined feature-icon feature-icon--union">schema</span>
+          <h3 class="feature-title">SVG diagrams</h3>
+          <p class="feature-desc">
+            Automatic orthogonal layout — no dragging, no fiddling. Versionable in git and rendered the same on
+            every machine.
+          </p>
+        </div>
+
+        <div class="feature-card feature-card--alias">
+          <span class="material-symbols-outlined feature-icon feature-icon--alias">swap_horiz</span>
+          <h3 class="feature-title">Round-trip conversion</h3>
+          <p class="feature-desc">
+            Convert existing TypeScript, Python, Rust, Go, or C# types back to the DSL. Retrofit an existing
+            codebase without rewriting it.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== Why this matters ===== -->
+  <section class="features" id="why">
+    <div class="features-inner">
+      <div class="features-grid features-grid--2">
+        <div class="feature-card feature-card--record">
+          <span class="material-symbols-outlined feature-icon feature-icon--record">hub</span>
+          <h3 class="feature-title">A shared schema, not a diagramming tool</h3>
+          <p class="feature-desc">
+            Unlike Mermaid or PlantUML, the diagram is a side effect — not the goal. The primary output is code, in
+            as many languages as you need, kept strictly in sync by construction.
+          </p>
+        </div>
+
+        <div class="feature-card feature-card--union">
+          <span class="material-symbols-outlined feature-icon feature-icon--union">sync</span>
+          <h3 class="feature-title">One definition, N outputs</h3>
+          <p class="feature-desc">
+            Python backend, Swift/Kotlin mobile app, TypeScript web client, Rust data pipeline — keeping DTOs
+            aligned across five languages is a full-time job. Change a field, regenerate, done.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== VS Code Extension ===== -->
+  <section class="cta-section" id="vscode">
+    <div class="cta-card">
+      <div class="cta-gradient"></div>
+      <div class="cta-content" style="max-width: none">
+        <span class="cta-eyebrow">VS Code Extension</span>
+        <h2 class="cta-title">Live preview in your editor.</h2>
+        <p class="cta-desc">
+          Syntax highlighting, hover docs, and a side-by-side SVG preview that updates as you type. Available free
+          on the Visual Studio Marketplace.
+        </p>
+        <a href="/vscode-screenshot.png">
+          <img
+            src="/vscode-screenshot.png"
+            alt="typeDiagram VS Code extension showing live SVG preview of a chat-model schema alongside .td source code"
+            loading="lazy"
+            width="1564"
+            height="1061"
+            style="width: 100%; height: auto; border-radius: 0.5rem; margin-bottom: var(--td-space-2xl)"
+          />
+        </a>
+        <div class="cta-buttons" style="flex-wrap: wrap">
+          <a
+            class="btn btn-primary"
+            href="https://marketplace.visualstudio.com/items?itemName=Nimblesite.typediagram"
+            >Install from Marketplace</a
+          >
+          <a class="btn btn-outline" href="/typediagram.vsix" download>Download .vsix</a>
+        </div>
+        <details style="margin-top: var(--td-space-2xl)">
+          <summary style="cursor: pointer; color: var(--td-primary); font-family: var(--td-font-mono)">
+            Install the .vsix manually
+          </summary>
+          <ol style="color: var(--td-outline); line-height: 1.7; margin-top: var(--td-space-lg)">
+            <li>Download <code>typediagram.vsix</code> above.</li>
+            <li>Open VS Code and press <code>Ctrl+Shift+P</code> (<code>Cmd+Shift+P</code> on macOS).</li>
+            <li>Run <strong>Extensions: Install from VSIX…</strong> and select the downloaded file.</li>
+            <li>Or from the terminal: <code>code --install-extension typediagram.vsix</code></li>
+          </ol>
+        </details>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CTA / Glassmorphism ===== -->
+  <section class="cta-section">
+    <div class="cta-card">
+      <div class="cta-gradient"></div>
+      <div class="cta-content">
+        <div class="cta-text">
+          <span class="cta-eyebrow">Engineered for Scale</span>
+          <h2 class="cta-title">Complex diagrams, simplified by code.</h2>
+          <p class="cta-desc">
+            Stop fighting with drag-and-drop tools. typeDiagram treats your architecture as a living document,
+            versionable and strictly typed.
+          </p>
+          <div class="cta-buttons">
+            <a class="btn btn-primary" href="/docs/">Get started</a>
+            <a class="btn btn-outline" href="#playground">Try the playground</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>

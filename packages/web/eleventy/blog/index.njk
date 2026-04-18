@@ -1,0 +1,52 @@
+---
+layout: base.njk
+tags: []
+permalink: /blog/index.html
+title: "typeDiagram Blog — Release Notes, Deep Dives, and Tips"
+description: "typeDiagram release notes, deep dives on the parser, layout engine and SVG renderer, and tips for modelling algebraic data types in plain text."
+stylesHref: /src/styles.css
+navLogoLink: /
+navPlaygroundHref: /#playground
+navConverterHref: /converter.html
+navDocsHref: /docs/
+navBlogHref: /blog/
+structuredData:
+  "@context": "https://schema.org"
+  "@type": "Blog"
+  name: "typeDiagram Blog"
+  url: "https://typediagram.dev/blog/"
+  description: "Release notes, deep dives, and tips for typeDiagram."
+  inLanguage: "en"
+---
+<main class="blog-index-main">
+  <header class="blog-index-header">
+    <span class="blog-index-eyebrow">Architecture Log</span>
+    <h1 class="blog-index-title">The typeDiagram Blog</h1>
+    <p class="blog-index-sub">Updates, deep dives, and release notes from the people building the DSL, parser, layout engine, and renderer.</p>
+  </header>
+  {% set posts = collections.post | reverse %}
+  {% if posts.length %}
+    <div class="blog-grid">
+      {% for post in posts %}
+        {% if post.url != page.url %}
+          <a class="blog-card" href="{{ post.url }}">
+            <div class="blog-card-meta">
+              <time datetime="{{ post.date | isoDate }}">{{ post.date | isoDate }}</time>
+              {% if post.data.author %}
+                <span class="blog-card-meta-dot"></span>
+                <span>{{ post.data.author }}</span>
+              {% endif %}
+            </div>
+            <h2 class="blog-card-title">{{ post.data.title }}</h2>
+            {% if post.data.description %}
+              <p class="blog-card-desc">{{ post.data.description }}</p>
+            {% endif %}
+            <span class="blog-card-read">Read post →</span>
+          </a>
+        {% endif %}
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="blog-index-empty">No posts yet. Check back soon.</div>
+  {% endif %}
+</main>

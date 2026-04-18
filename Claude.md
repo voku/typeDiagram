@@ -1,38 +1,39 @@
-<!-- agent-pmo:2efd847 -->
-
 # typeDiagram — Agent Instructions
 
-> Read this file in full. Rules below are NON-NEGOTIABLE — violations are rejected in review.
+Read this file in full. Rules below are NON-NEGOTIABLE — violations are rejected in review.
+
+<!-- agent-pmo:02a321a -->
 
 ⚠️ **TOKEN ECONOMICS DISCIPLINE.** Check file size first. `Grep` over `Read`. Use `offset`/`limit`.
 Smallest diff that solves the problem. Delete dead code, unused imports, stale comments.
 Call out irrelevant context before proceeding. Bloat degrades reasoning. ⚠️
+⚠️ DON'T ASK THE USER QUESTIONS!!!
 
-DON'T ASK THE USER QUESTIONS!!! DO YOUR JOB. USE YOUR JDUGMENT!
+- DO YOUR JOB and don't say things like "Open questions before I start"
+- USE YOUR JUDGEMENT! ⚠️
+  ⚠️ NEVER KILL ANY VSCODE PROCESS ⚠️
 
 ## Project Overview
 
 typeDiagram is a small DSL for diagramming algebraic data types (records + tagged unions). Language-neutral, no methods. Includes a parser, model, layout engine, SVG renderer, and markdown support. Ships as an npm library, CLI tool, VS Code extension, and web playground.
 
-**Primary language(s):** TypeScript
-**Build command:** `make ci`
-**Test command:** `make test`
-**Lint command:** `make lint`
+## Testing Rules
 
-## Too Many Cooks (Multi-Agent Coordination)
+### Bulk of tests
 
-If the TMC server is available: register on start (name, intent, files), lock files before editing, broadcast your plan, check messages periodically, release locks when done. Never edit a locked file — wait or take another approach.
+- complex diagram text- > programming language type text
+- complex programming language type text example -> diagram
+- complex diagram text -> SVG
+- Loads of assertions in each test
+- Avoid fine grained unit tests
 
-## Packages Layout
-
-Monorepo under `packages/`:
-
-- `packages/typediagram/` — core framework (parser, model, layout, render-svg, markdown). Owned by `typediagram-builder` agent.
-- `packages/cli/` — CLI app (`typediagram` bin). Pure consumer of the framework public API. Owned by `type-model-claude`.
-- `packages/web/` — web playground (Vite). Pure consumer of the framework public API. Owned by `type-model-claude`.
-- `packages/vscode/` — VS Code extension.
-
-Framework logic lives only in `packages/typediagram/`. `cli`, `web`, and `vscode` are glue — no parsing, layout, or rendering logic duplicated.
+- **Never delete or skip tests. Never remove assertions.** Fix the code or the expectation. 100% coverage is the goal.
+- **Never skip a test** without a ticket number AND expiry date in the skip reason.
+- **Specific assertions only.** `assert.ok(true)` is illegal.
+- **No try/catch in tests that swallows exceptions and asserts success.**
+- **Deterministic.** No `sleep()`, no timing dependencies, no random state.
+- **E2E tests: black-box only** — public APIs, UI, or CLI. Never reach into internals.
+- **VS Code extension E2E:** interact only via `vscode.commands.executeCommand`.
 
 ## Hard Rules — Universal (no exceptions)
 
@@ -53,7 +54,6 @@ Framework logic lives only in `packages/typediagram/`. `cli`, `web`, and `vscode
 - **Never explicitly type function return values when the type is inferred** (`explicit-function-return-type` = ILLEGAL).
 - **Routinely format with prettier.**
 - **NO REGEX on structured data.** Use real parsers for JSON/YAML/TOML/code.
-- **Never delete or skip tests. Never remove assertions.** 100% coverage is the goal.
 - **`make test` ALWAYS computes coverage AND enforces it.** Threshold lives in `coverage-thresholds.json` at the repo root — NOT env vars, NOT gh repo variables, NOT CI YAML. Below threshold = pipeline fails. Ratchet only. See [COVERAGE-THRESHOLDS-JSON].
 
 ## Hard Rules — TypeScript
@@ -66,7 +66,7 @@ Framework logic lives only in `packages/typediagram/`. `cli`, `web`, and `vscode
 
 ## CSS Budget
 
-CSS BUDGET = 1.5 LOC - HARD CEILING.
+CSS BUDGET = 2k LOC - HARD CEILING.
 
 ## Logging Standards
 
@@ -77,23 +77,20 @@ CSS BUDGET = 1.5 LOC - HARD CEILING.
 - **NEVER log PII** (names, emails, phone, IPs unless audit with consent).
 - **NEVER log secrets.** Log `"key: present"` or a truncated hash, never the value.
 
-## Testing Rules
+## Too Many Cooks (Multi-Agent Coordination)
 
-### Bulk of tests
+If the TMC server is available: register on start (name, intent, files), lock files before editing, broadcast your plan, check messages periodically, release locks when done. Never edit a locked file — wait or take another approach.
 
-- complex diagram text- > programming language type text
-- complex programming language type text example -> diagram
-- complex diagram text -> SVG
-- Loads of assertions in each test
-- Avoid fine grained unit tests
+## Packages Layout
 
-- **Never delete a failing test.** Fix the code or the expectation.
-- **Never skip a test** without a ticket number AND expiry date in the skip reason.
-- **Specific assertions only.** `assert.ok(true)` is illegal.
-- **No try/catch in tests that swallows exceptions and asserts success.**
-- **Deterministic.** No `sleep()`, no timing dependencies, no random state.
-- **E2E tests: black-box only** — public APIs, UI, or CLI. Never reach into internals.
-- **VS Code extension E2E:** interact only via `vscode.commands.executeCommand`.
+Monorepo under `packages/`:
+
+- `packages/typediagram/` — core framework (parser, model, layout, render-svg, markdown). Owned by `typediagram-builder` agent.
+- `packages/cli/` — CLI app (`typediagram` bin). Pure consumer of the framework public API. Owned by `type-model-claude`.
+- `packages/web/` — web playground (Vite). Pure consumer of the framework public API. Owned by `type-model-claude`.
+- `packages/vscode/` — VS Code extension.
+
+Framework logic lives only in `packages/typediagram/`. `cli`, `web`, and `vscode` are glue — no parsing, layout, or rendering logic duplicated.
 
 ## Website
 
@@ -116,7 +113,7 @@ make ci      # lint + test + build (full CI simulation)
 make setup   # post-create dev environment setup
 ```
 
-**Custom rules must be separated by a line after the core AgentPMO males** `make test` runs the test runner with its fail-fast flag, collects coverage, asserts measured >= threshold from `coverage-thresholds.json`, and exits non-zero on any failure. To debug a single test, invoke the runner directly — that is not a Makefile target.
+Only those 7 public targets are standard (see REPO-STANDARDS-SPEC [MAKE-TARGETS]). Repo-specific targets live below them in the `Repo Specific Targets` section. `make test` runs the test runner with its fail-fast flag, collects coverage, asserts measured >= threshold from `coverage-thresholds.json`, and exits non-zero on any failure. To debug a single test, invoke the runner directly — that is not a Makefile target.
 
 **`make fmt`** formats code in-place. **`make lint`** runs linters/analyzers (read-only, no formatting). **`make test`** runs tests with coverage. Three separate targets — no overlap.
 

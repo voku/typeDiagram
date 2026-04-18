@@ -1,0 +1,44 @@
+---
+layout: base.njk
+stylesHref: /src/styles.css
+navLogoLink: /
+navPlaygroundHref: /#playground
+navConverterHref: /converter.html
+navDocsHref: /docs/
+navBlogHref: /blog/
+ogType: article
+eleventyComputed:
+  pageTitle: "{{ title }} — typeDiagram Blog"
+  description: "{{ description | default(title + ' — on the typeDiagram blog.') }}"
+  structuredData:
+    "@context": "https://schema.org"
+    "@type": "BlogPosting"
+    headline: "{{ title }}"
+    datePublished: "{{ page.date | isoDate }}"
+    dateModified: "{{ page.date | isoDate }}"
+    author:
+      "@type": "Organization"
+      name: "{{ author | default('typeDiagram') }}"
+    publisher:
+      "@type": "Organization"
+      name: "typeDiagram"
+      url: "https://typediagram.dev/"
+    mainEntityOfPage: "https://typediagram.dev{{ page.url }}"
+    inLanguage: "en"
+---
+<main class="post-main">
+  <header class="post-header">
+    <div class="post-meta">
+      <time datetime="{{ page.date | isoDate }}">{{ page.date | isoDate }}</time>
+      {% if author %}
+        <span class="post-meta-dot"></span>
+        <span>{{ author }}</span>
+      {% endif %}
+    </div>
+    <h1 class="post-title">{{ title }}</h1>
+    {% if description %}<p class="post-lede">{{ description }}</p>{% endif %}
+  </header>
+  <article class="post-article">
+    {{ content | safe }}
+  </article>
+</main>
