@@ -1,28 +1,28 @@
 ---
-title: "Class Diagrams for Algebraic Data Types: Diagram-as-Code and Source Generation with typeDiagram"
+title: "Class Diagrams for Modern Type Systems: Diagram-as-Code and Source Generation with typeDiagram"
 date: 2026-04-18
 author: "The typeDiagram team"
-description: "A practical guide to class diagrams for algebraic data types, discriminated unions, and tagged unions. Generate TypeScript, Rust, C#, F#, Go, and Python types from one diagram, render SVG via pluggable hooks, and embed in Markdown — all diagram-as-code, all open source."
+description: "A practical guide to class diagrams for modern type systems, including records, discriminated unions, and tagged unions. Generate TypeScript, Rust, C#, F#, Go, and Python types from one diagram, render SVG via pluggable hooks, and embed in Markdown — all diagram-as-code, all open source."
 permalink: "/blog/welcome/index.html"
 ---
 
 If you searched for a **class diagram** tool for modern type systems, a way to **generate types from a diagram**, or an **AI-ready diagram-as-code** workflow, this post answers the three questions developers actually ask in 2026:
 
-1. How do I draw a **class diagram for algebraic data types, discriminated unions, and tagged unions**?
+1. How do I draw a **class diagram for records, discriminated unions, and tagged unions**?
 2. How do I **generate TypeScript, Rust, C#, F#, Go, or Python types** from one diagram?
 3. How do I get an **AI-assisted class diagram** that stays in sync with my codebase?
 
 The short answer: **typeDiagram**. It is a full diagram-as-code ecosystem — a tiny DSL for records and tagged unions, a parser, a layout engine, an SVG renderer with pluggable render hooks, a source generator for seven languages — TypeScript, Rust, C#, F#, Go, Python, and PHP — a Markdown plugin, a CLI, and a VS Code extension. Language-neutral, open source, and designed to slot into Markdown, VS Code, and MCP-based AI workflows.
 
-## Class diagrams for a post-OOP world
+## Class diagrams for the way we actually write types today
 
-Classical UML class diagrams were built for object-oriented design: classes, methods, inheritance, visibility, multiplicities. They still have their place — and excellent tools exist for drawing them.
+Classical UML class diagrams were built around classes, methods, inheritance, visibility, and multiplicities. They still have their place, and excellent tools exist for drawing them.
 
-But modern codebases increasingly look different. TypeScript has discriminated unions. Rust has `enum`s with payloads. Swift has `enum` cases with associated values. Kotlin has sealed classes. F# and OCaml have had sum types since the 1970s. C# 10 added `record`s. Python has `dataclass` and `Literal` tag fields. **Every mainstream language today is an algebraic data type language** in everything but name.
+But a lot of modern code has grown beyond that shape. TypeScript has discriminated unions. Rust has `enum`s with payloads. Swift has `enum` cases with associated values. Kotlin has sealed classes. C# 10 added `record`s. Python has `dataclass` and `Literal` tag fields. F# and OCaml have had these features for decades. Almost every mainstream language now has a way to express **records and tagged variants** as first-class types — whether you lean OOP, FP, or somewhere in between.
 
-Drawing a Rust `Result<T, E>` or a TypeScript `type Event = { kind: "click"; x: number } | { kind: "scroll"; y: number }` as a traditional class diagram forces you into stereotypes, notes, or inheritance hierarchies that do not match the code.
+Drawing a Rust `Result<T, E>` or a TypeScript `type Event = { kind: "click"; x: number } | { kind: "scroll"; y: number }` as a traditional class diagram pushes you into stereotypes, notes, or inheritance hierarchies that do not match the code.
 
-typeDiagram is a class diagram tool built specifically for this style. No methods. No inheritance. Just **records** (product types) and **unions** (sum types), with a rendering that matches how the code is actually written — and a source generator that turns the picture back into code.
+typeDiagram is a class diagram tool built specifically for this style. Just **records** and **tagged variants**, with a rendering that matches how the code is actually written — and a source generator that turns the picture back into code. It sits next to your existing UML or class diagram workflow, it does not replace it.
 
 ## What is diagram-as-code, and why should you care?
 
@@ -32,7 +32,7 @@ typeDiagram is diagram-as-code, but focused. It does **one thing**: type diagram
 
 ### typeDiagram syntax in 30 seconds
 
-```
+```typediagram
 record User {
   id: UUID
   email: string
@@ -54,7 +54,7 @@ No classes. No methods. No stereotypes. Just the shape of your data.
 
 Mermaid and PlantUML are excellent, general-purpose diagram-as-code tools. Mermaid's `classDiagram` and PlantUML's UML support cover a huge range: sequence, state, flowchart, ER, deployment, C4. For most of those jobs, they are the right pick, and typeDiagram does not try to replace them.
 
-typeDiagram is **focused**. It does one thing: class diagrams for algebraic data types, end-to-end. That focus buys three things general UML renderers do not offer:
+typeDiagram is **focused**. It does one thing: class diagrams for records and tagged variants, end-to-end. That focus buys three things general UML renderers do not offer:
 
 - **First-class discriminated unions and tagged unions.** Variants and their payloads are a primitive in the DSL, not a workaround using inheritance or stereotype notes. The layout engine knows the difference between a variant-of edge and a reference edge.
 - **Source generation in seven languages.** One diagram round-trips to idiomatic TypeScript, Rust, C#, F#, Go, Python, and PHP — and back. No general-purpose UML tool does this.
