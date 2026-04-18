@@ -2,8 +2,6 @@
 import { mountPlayground } from "./playground.js";
 
 const el = document.getElementById("playground-mount");
-if (el !== null) {
+if (el instanceof HTMLElement) {
   mountPlayground(el);
-} else {
-  console.error("[WEB-MAIN] missing #playground-mount");
 }

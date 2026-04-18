@@ -8,7 +8,7 @@ import { createViewport, setViewportContent } from "./viewport.js";
 import { initEditorZoom } from "./editor-zoom.js";
 import { createZoomControls } from "./zoom-controls.js";
 
-const SAMPLES: Record<SupportedLang, string> = {
+export const SAMPLES: Record<SupportedLang, string> = {
   typescript: `export interface ChatRequest {
   message: string;
   session_id: string;
@@ -97,7 +97,10 @@ pub enum UriKind {
     Api,
 }
 `,
-  python: `from dataclasses import dataclass
+  python: `from __future__ import annotations
+from dataclasses import dataclass
+from enum import Enum
+from typing import Optional
 
 @dataclass
 class ChatRequest:
@@ -128,6 +131,14 @@ class UriPart:
     url: str
     kind: UriKind
     media_type: Optional[str]
+
+class UriKind(str, Enum):
+    Image = "image"
+    Audio = "audio"
+    Video = "video"
+    Document = "document"
+    Web = "web"
+    Api = "api"
 `,
   go: `type ChatRequest struct {
 	Message     string
@@ -269,12 +280,25 @@ declare(strict_types=1);
 final readonly class ChatRequest
 {
     /**
-     * @param list<ToolResult> $tool_results
+     * @param list<ToolResult>|null $tool_results
      */
     public function __construct(
         public string $message,
         public string $session_id,
-        public array $tool_results,
+        public ?array $tool_results = null,
+    ) {}
+}
+
+final readonly class ChatTurnInput
+{
+    /**
+     * @param list<ToolResult>|null $tool_results
+     */
+    public function __construct(
+        public AgentConfig $config,
+        public string $user_message,
+        public string $session_id,
+        public ?array $tool_results = null,
     ) {}
 }
 
@@ -288,6 +312,22 @@ final readonly class ToolResult
     ) {}
 }
 
+final readonly class TextPart
+{
+    public function __construct(
+        public string $text,
+    ) {}
+}
+
+final readonly class UriPart
+{
+    public function __construct(
+        public string $url,
+        public UriKind $kind,
+        public ?string $media_type = null,
+    ) {}
+}
+
 interface ContentItem
 {
 }
@@ -298,16 +338,112 @@ final readonly class Text implements ContentItem
     public string $kind;
 
     public function __construct(
-        public string $value,
+        public TextPart $value,
     )
     {
         $this->kind = 'Text';
     }
 }
+
+final readonly class Uri implements ContentItem
+{
+    /** @var 'Uri' */
+    public string $kind;
+
+    public function __construct(
+        public UriPart $value,
+    )
+    {
+        $this->kind = 'Uri';
+    }
+}
+
+final readonly class Scalar implements ContentItem
+{
+    /** @var 'Scalar' */
+    public string $kind;
+
+    public function __construct(
+        public string $value,
+    )
+    {
+        $this->kind = 'Scalar';
+    }
+}
+
+interface UriKind
+{
+}
+
+final readonly class Image implements UriKind
+{
+    /** @var 'Image' */
+    public string $kind;
+
+    public function __construct()
+    {
+        $this->kind = 'Image';
+    }
+}
+
+final readonly class Audio implements UriKind
+{
+    /** @var 'Audio' */
+    public string $kind;
+
+    public function __construct()
+    {
+        $this->kind = 'Audio';
+    }
+}
+
+final readonly class Video implements UriKind
+{
+    /** @var 'Video' */
+    public string $kind;
+
+    public function __construct()
+    {
+        $this->kind = 'Video';
+    }
+}
+
+final readonly class Document implements UriKind
+{
+    /** @var 'Document' */
+    public string $kind;
+
+    public function __construct()
+    {
+        $this->kind = 'Document';
+    }
+}
+
+final readonly class Web implements UriKind
+{
+    /** @var 'Web' */
+    public string $kind;
+
+    public function __construct()
+    {
+        $this->kind = 'Web';
+    }
+}
+
+final readonly class Api implements UriKind
+{
+    /** @var 'Api' */
+    public string $kind;
+
+    public function __construct()
+    {
+        $this->kind = 'Api';
+    }
+}
 `,
 };
 
-const TD_SAMPLE = `typeDiagram
+export const TD_SAMPLE = `typeDiagram
 
 type ChatRequest {
   message:      String

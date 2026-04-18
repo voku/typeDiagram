@@ -2,8 +2,6 @@
 import { mountConverter } from "./converter.js";
 
 const el = document.getElementById("converter-mount");
-if (el !== null) {
+if (el instanceof HTMLElement) {
   mountConverter(el);
-} else {
-  console.error("[WEB-CONV-MAIN] missing #converter-mount");
 }
