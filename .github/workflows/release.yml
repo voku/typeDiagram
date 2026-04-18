@@ -90,7 +90,18 @@ jobs:
           if ! gh release view "$TAG" >/dev/null 2>&1; then
             gh release create "$TAG" --title "$TAG" --generate-notes --prerelease
           fi
-          gh release upload "$TAG" typediagram-*.vsix typediagram-core-*.tgz typediagram-*.tgz --clobber
+          # Collect unique assets — `typediagram-*.tgz` overlaps `typediagram-core-*.tgz`,
+          # so globbing both would make `gh release upload` race against itself with
+          # --clobber and return HTTP 404. Dedupe by path via `sort -u`.
+          ASSETS=$(ls typediagram-*.vsix typediagram-core-*.tgz typediagram-*.tgz 2>/dev/null | sort -u)
+          if [ -z "$ASSETS" ]; then
+            echo "No release assets found to upload" >&2
+            exit 1
+          fi
+          echo "Uploading:"
+          echo "$ASSETS"
+          # shellcheck disable=SC2086  # word-splitting is intentional here
+          gh release upload "$TAG" $ASSETS --clobber
         env:
           GH_TOKEN: ${{ github.token }}
 
