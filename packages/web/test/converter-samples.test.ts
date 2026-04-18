@@ -25,16 +25,19 @@ describe("[WEB-CONV-SAMPLES] converter page seed content", () => {
     const parsed = parser.parse(TD_SAMPLE);
     expect(parsed.ok).toBe(true);
     if (!parsed.ok) {
-      return;
+      expect.fail(JSON.stringify(parsed.error));
     }
 
     const built = model.buildModel(parsed.value);
     expect(built.ok).toBe(true);
     if (!built.ok) {
-      return;
+      expect.fail(JSON.stringify(built.error));
     }
 
-    assertDeclNames(built.value.decls.map((decl) => decl.name), EXPECTED_BY_LANG.typescript);
+    assertDeclNames(
+      built.value.decls.map((decl) => decl.name),
+      EXPECTED_BY_LANG.typescript
+    );
   });
 
   for (const [lang, source] of Object.entries(SAMPLES) as [SupportedLang, string][]) {
@@ -42,10 +45,13 @@ describe("[WEB-CONV-SAMPLES] converter page seed content", () => {
       const converted = converters[lang].fromSource(source);
       expect(converted.ok).toBe(true);
       if (!converted.ok) {
-        return;
+        expect.fail(JSON.stringify(converted.error));
       }
 
-      assertDeclNames(converted.value.decls.map((decl) => decl.name), EXPECTED_BY_LANG[lang]);
+      assertDeclNames(
+        converted.value.decls.map((decl) => decl.name),
+        EXPECTED_BY_LANG[lang]
+      );
 
       const reParsed = parser.parse(model.printSource(converted.value));
       expect(reParsed.ok).toBe(true);
