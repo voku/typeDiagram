@@ -233,8 +233,8 @@ const renderDocblock = (lines: readonly string[], indent = "") =>
 
 const renderConstructor = (params: readonly RenderedParam[], bodyLines: readonly string[]) => {
   const docLines = params
-    .filter((param): param is RenderedParam & { docType: string } => param.docType !== null)
-    .map((param) => `@param ${param.docType} $${param.name}`);
+    .filter((param) => param.docType !== null)
+    .map((param) => `@param ${String(param.docType)} $${param.name}`);
   const renderedDoc = renderDocblock(docLines, "    ");
   const renderedParams = params.map(
     (param) => `        public ${param.nativeType} $${param.name}${param.hasDefaultNull ? " = null" : ""},`
