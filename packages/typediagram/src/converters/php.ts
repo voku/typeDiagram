@@ -465,16 +465,12 @@ const mapPhpDocTypeToTd = (docType: string): string => {
   }
   if (trimmed.startsWith("array<") && trimmed.endsWith(">")) {
     const args = splitGenericArgs(trimmed.slice(6, -1));
-    const firstArg = args[0];
-    const secondArg = args[1];
+    // splitGenericArgs (via splitTopLevel) only produces non-empty strings, so
+    // index accesses are safe — the as-string casts replace unreachable undefined guards.
     return args.length === 1
-      ? firstArg === undefined
-        ? "Map<String, String>"
-        : `List<${mapPhpDocTypeToTd(firstArg)}>`
+      ? `List<${mapPhpDocTypeToTd(args[0] as string)}>`
       : args.length === 2
-        ? firstArg === undefined || secondArg === undefined
-          ? "Map<String, String>"
-          : `Map<${mapPhpDocTypeToTd(firstArg)}, ${mapPhpDocTypeToTd(secondArg)}>`
+        ? `Map<${mapPhpDocTypeToTd(args[0] as string)}, ${mapPhpDocTypeToTd(args[1] as string)}>`
         : "Map<String, String>";
   }
   return PHP_TO_TD[trimmed] ?? trimmed;

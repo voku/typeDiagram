@@ -1,13 +1,14 @@
 #!/usr/bin/env node
-// [CI-BUNDLE-SIZE] Fail if the framework bundle (excluding elkjs) exceeds 50KB.
+// [CI-BUNDLE-SIZE] Fail if the framework bundle (excluding elkjs) exceeds 60KB.
 // Uses esbuild to tree-shake and measure the output size.
+// Budget was raised from 50KB to 60KB to accommodate the PHP bidirectional converter.
 import { build } from "esbuild";
 import { resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const entry = resolve(here, "..", "src", "index.ts");
-const BUDGET_KB = 50;
+const BUDGET_KB = 60;
 
 const result = await build({
   entryPoints: [entry],

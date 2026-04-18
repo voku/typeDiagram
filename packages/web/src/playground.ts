@@ -227,6 +227,10 @@ export const mountPlayground = (container: HTMLElement) => {
   syncPresetButtons(hooksToolbar, hooksEditor.value);
 
   const run = async () => {
+    // Guard: skip if the playground has been removed from the DOM (e.g. in tests).
+    if (!editor.isConnected) {
+      return;
+    }
     const evaluated = evalHooks(hooksEditor.value);
     if (evaluated.ok) {
       hooksDiag.hidden = true;
