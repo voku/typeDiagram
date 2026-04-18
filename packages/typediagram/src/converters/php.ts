@@ -12,7 +12,7 @@ const TD_TO_PHP_NATIVE: Record<string, string> = {
   Float: "float",
   String: "string",
   Bytes: "string",
-  Unit: "void",
+  Unit: "null",
 };
 
 const TD_TO_PHP_DOC: Record<string, string> = {
@@ -21,7 +21,7 @@ const TD_TO_PHP_DOC: Record<string, string> = {
   Float: "float",
   String: "string",
   Bytes: "string",
-  Unit: "void",
+  Unit: "null",
 };
 
 const PHP_TO_TD: Record<string, string> = {
@@ -29,6 +29,7 @@ const PHP_TO_TD: Record<string, string> = {
   int: "Int",
   float: "Float",
   string: "String",
+  null: "Unit",
   void: "Unit",
 };
 
@@ -88,14 +89,71 @@ const adjustDepth = (depth: number, char: string, openChar: string, closeChar: s
   return depth;
 };
 
+interface PhpScanState {
+  depth: number;
+  quote: '"' | "'" | null;
+  escaping: boolean;
+  lineComment: boolean;
+  blockComment: boolean;
+}
+
+const DEFAULT_SCAN_STATE: PhpScanState = {
+  depth: 0,
+  quote: null,
+  escaping: false,
+  lineComment: false,
+  blockComment: false,
+};
+
+const advancePhpScanState = (
+  source: string,
+  index: number,
+  state: PhpScanState,
+  openChar: string,
+  closeChar: string
+): PhpScanState => {
+  const char = source.charAt(index);
+  const nextChar = source.charAt(index + 1);
+  if (state.lineComment) {
+    return char === "\n" ? { ...state, lineComment: false } : state;
+  }
+  if (state.blockComment) {
+    return char === "*" && nextChar === "/" ? { ...state, blockComment: false } : state;
+  }
+  if (state.quote !== null) {
+    if (state.escaping) {
+      return { ...state, escaping: false };
+    }
+    if (char === "\\") {
+      return { ...state, escaping: true };
+    }
+    return char === state.quote ? { ...state, quote: null } : state;
+  }
+  if (char === "/" && nextChar === "/") {
+    return { ...state, lineComment: true };
+  }
+  if (char === "/" && nextChar === "*") {
+    return { ...state, blockComment: true };
+  }
+  if (char === '"' || char === "'") {
+    return { ...state, quote: char, escaping: false };
+  }
+  return { ...state, depth: adjustDepth(state.depth, char, openChar, closeChar) };
+};
+
 const splitTopLevel = (source: string, openChar: string, closeChar: string): string[] => {
   const parts: string[] = [];
-  let depth = 0;
+  let state = DEFAULT_SCAN_STATE;
   let start = 0;
   for (let i = 0; i < source.length; i++) {
-    const char = source.charAt(i);
-    depth = adjustDepth(depth, char, openChar, closeChar);
-    if (char === "," && depth === 0) {
+    state = advancePhpScanState(source, i, state, openChar, closeChar);
+    if (
+      source.charAt(i) === "," &&
+      state.depth === 0 &&
+      state.quote === null &&
+      !state.lineComment &&
+      !state.blockComment
+    ) {
       const part = source.slice(start, i).trim();
       if (part.length > 0) {
         parts.push(part);
@@ -132,7 +190,7 @@ const getBasePhpTypeSpec = (type: ResolvedTypeRef, generics: ReadonlySet<string>
     return { nativeType: "array", docType: mapTdToPhpDocType(type), hasDefaultNull: false };
   }
   if (type.name === "Unit") {
-    return { nativeType: "mixed", docType: "void", hasDefaultNull: false };
+    return { nativeType: "null", docType: null, hasDefaultNull: false };
   }
   return { nativeType: TD_TO_PHP_NATIVE[type.name] ?? type.name, docType: null, hasDefaultNull: false };
 };
@@ -144,6 +202,9 @@ const getPhpTypeSpec = (type: ResolvedTypeRef, generics: ReadonlySet<string>): P
   const inner = unwrapOptionType(type);
   if (generics.has(inner.name)) {
     return { nativeType: "mixed", docType: `${inner.name}|null`, hasDefaultNull: true };
+  }
+  if (inner.name === "Unit") {
+    return { nativeType: "null", docType: null, hasDefaultNull: true };
   }
   const base = getBasePhpTypeSpec(inner, generics);
   if (base.nativeType === "array") {
@@ -289,10 +350,10 @@ const toPhp = (model: Model): string => {
 };
 
 const findMatchingDelimiter = (source: string, openIndex: number, openChar: string, closeChar: string) => {
-  let depth = 0;
+  let state = DEFAULT_SCAN_STATE;
   for (let index = openIndex; index < source.length; index++) {
-    depth = adjustDepth(depth, source.charAt(index), openChar, closeChar);
-    if (depth === 0) {
+    state = advancePhpScanState(source, index, state, openChar, closeChar);
+    if (state.depth === 0 && state.quote === null && !state.lineComment && !state.blockComment) {
       return index;
     }
   }
@@ -347,18 +408,24 @@ const parseParams = (source: string, constructorDoc: string | null): ParsedParam
   const docTypes = parseParamDocsFromDocblock(constructorDoc);
   return splitParams(source)
     .map((part) => {
-      const match = /public\s+([?A-Za-z_][A-Za-z0-9_]*)\s+\$(\w+)(?:\s*=\s*null)?/.exec(part.replace(/\s+/g, " "));
-      if (match === null) {
+      const trimmed = part.trim();
+      if (!trimmed.startsWith("public ")) {
         return null;
       }
-      const [, nativeType, name] = match;
-      return nativeType === undefined || name === undefined
+      const afterPublic = trimmed.slice("public ".length).trimStart();
+      const dollarIndex = afterPublic.indexOf("$");
+      if (dollarIndex === -1) {
+        return null;
+      }
+      const nativeType = afterPublic.slice(0, dollarIndex).trim();
+      const name = /^(\w+)/.exec(afterPublic.slice(dollarIndex + 1))?.[1];
+      return nativeType.length === 0 || name === undefined
         ? null
         : {
             name,
             nativeType,
             docType: docTypes.get(name) ?? null,
-            hasDefaultNull: /=\s*null$/.test(part.trim()),
+            hasDefaultNull: /=\s*null$/.test(trimmed),
           };
     })
     .filter((param): param is ParsedParam => param !== null);
@@ -397,10 +464,18 @@ const mapPhpDocTypeToTd = (docType: string): string => {
     return `List<${mapPhpDocTypeToTd(trimmed.slice(5, -1))}>`;
   }
   if (trimmed.startsWith("array<") && trimmed.endsWith(">")) {
-    const [keyType, valueType] = splitGenericArgs(trimmed.slice(6, -1));
-    return keyType === undefined || valueType === undefined
-      ? "Map<String, String>"
-      : `Map<${mapPhpDocTypeToTd(keyType)}, ${mapPhpDocTypeToTd(valueType)}>`;
+    const args = splitGenericArgs(trimmed.slice(6, -1));
+    const firstArg = args[0];
+    const secondArg = args[1];
+    return args.length === 1
+      ? firstArg === undefined
+        ? "Map<String, String>"
+        : `List<${mapPhpDocTypeToTd(firstArg)}>`
+      : args.length === 2
+        ? firstArg === undefined || secondArg === undefined
+          ? "Map<String, String>"
+          : `Map<${mapPhpDocTypeToTd(firstArg)}, ${mapPhpDocTypeToTd(secondArg)}>`
+        : "Map<String, String>";
   }
   return PHP_TO_TD[trimmed] ?? trimmed;
 };
@@ -408,7 +483,38 @@ const mapPhpDocTypeToTd = (docType: string): string => {
 const toTypeRef = (param: ParsedParam) =>
   parseTypeRef(param.docType === null ? mapPhpNativeTypeToTd(param.nativeType) : mapPhpDocTypeToTd(param.docType));
 
-const parseKindLiteral = (body: string) => /@var\s+'([^']+)'[\s\S]*?public string \$kind;/.exec(body)?.[1] ?? null;
+const readQuotedLiteral = (source: string, startIndex: number, quote: '"' | "'") => {
+  let value = "";
+  let escaping = false;
+  for (let index = startIndex; index < source.length; index++) {
+    const char = source.charAt(index);
+    if (escaping) {
+      value += char;
+      escaping = false;
+      continue;
+    }
+    if (char === "\\") {
+      escaping = true;
+      continue;
+    }
+    if (char === quote) {
+      return value;
+    }
+    value += char;
+  }
+  return null;
+};
+
+const parseKindLiteral = (body: string) => {
+  const propertyIndex = body.indexOf("public string $kind;");
+  const varIndex = body.indexOf("@var ");
+  if (propertyIndex === -1 || varIndex === -1 || varIndex > propertyIndex) {
+    return null;
+  }
+  const literalStart = varIndex + "@var ".length;
+  const quote = body.charAt(literalStart);
+  return quote === "'" || quote === '"' ? readQuotedLiteral(body, literalStart + 1, quote) : null;
+};
 
 const fromPhp = (source: string): Result<Model, Diagnostic[]> => {
   const declarations = parseDeclarations(source);

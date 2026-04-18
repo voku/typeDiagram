@@ -78,8 +78,9 @@ type MaybeNothing {
     expect(output).toContain("@typediagram-kind alias");
     expect(output).toContain("final readonly class UserId");
     expect(output).toContain("final readonly class Nothing");
-    expect(output).toContain("@param void $value");
-    expect(output).toContain("@param void|null $value");
+    expect(output).toContain("final readonly class MaybeNothing");
+    expect(output).toContain("public null $value,");
+    expect(output).toContain("public null $value = null,");
   });
 });
 
@@ -179,6 +180,53 @@ final readonly class NoCtor
     expect(missingKind?.kind === "record" ? missingKind.fields : []).toHaveLength(0);
     expect(noCtor?.kind).toBe("record");
     expect(noCtor?.kind === "record" ? noCtor.fields : []).toHaveLength(0);
+  });
+
+  it("parses namespaced types, array item docblocks, double-quoted kind tags, and defaults with commas", () => {
+    const src = `<?php
+
+declare(strict_types=1);
+
+interface Outcome
+{
+}
+
+final readonly class Success implements Outcome
+{
+    /** @var "Success" */
+    public string $kind;
+
+    public function __construct(
+        public string $message = "Hello, world" /* keep, comment */,
+        public \\App\\DTO\\User $user,
+    ) {
+        $this->kind = "Success";
+    }
+}
+
+final readonly class CollectionHolder
+{
+    /**
+     * @param array<\\App\\DTO\\User> $users
+     */
+    public function __construct(
+        public array $users,
+    ) {}
+}
+`;
+    const model = unwrap(php.fromSource(src));
+    const outcome = model.decls.find((decl) => decl.name === "Outcome");
+    const holder = model.decls.find((decl) => decl.name === "CollectionHolder");
+
+    expect(outcome?.kind).toBe("union");
+    expect(outcome?.kind === "union" ? outcome.variants.length : 0).toBe(1);
+    expect(outcome?.kind === "union" ? outcome.variants[0]?.name : "").toBe("Success");
+    expect(outcome?.kind === "union" ? outcome.variants[0]?.fields[0]?.name : "").toBe("message");
+    expect(outcome?.kind === "union" ? outcome.variants[0]?.fields[0]?.type.name : "").toBe("String");
+    expect(outcome?.kind === "union" ? outcome.variants[0]?.fields[1]?.type.name : "").toBe("\\App\\DTO\\User");
+    expect(holder?.kind).toBe("record");
+    expect(holder?.kind === "record" ? holder.fields[0]?.type.name : "").toBe("List");
+    expect(holder?.kind === "record" ? holder.fields[0]?.type.args[0]?.name : "").toBe("\\App\\DTO\\User");
   });
 });
 
