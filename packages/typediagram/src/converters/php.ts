@@ -53,7 +53,7 @@ interface RenderedParam extends PhpTypeSpec {
   name: string;
 }
 
-interface ParsedParam extends RenderedParam {}
+type ParsedParam = RenderedParam;
 
 interface ParsedInterface {
   declType: "interface";
@@ -233,7 +233,7 @@ const renderDocblock = (lines: readonly string[], indent = "") =>
 
 const renderConstructor = (params: readonly RenderedParam[], bodyLines: readonly string[]) => {
   const docLines = params
-    .filter((param) => param.docType !== null)
+    .filter((param): param is RenderedParam & { docType: string } => param.docType !== null)
     .map((param) => `@param ${param.docType} $${param.name}`);
   const renderedDoc = renderDocblock(docLines, "    ");
   const renderedParams = params.map(
@@ -572,7 +572,7 @@ const fromPhp = (source: string): Result<Model, Diagnostic[]> => {
     const isAlias = /@typediagram-kind\s+alias/.test(declaration.docblock ?? "");
     if (isAlias) {
       const valueParam = constructor.params[0];
-      if (valueParam === undefined || valueParam.name !== "value") {
+      if (valueParam?.name !== "value") {
         continue;
       }
       found = true;
