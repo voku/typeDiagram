@@ -4,9 +4,9 @@
 
 typeDiagram is a tiny, language-neutral DSL for describing **algebraic data types** — records, tagged unions, generics, aliases. From one `.td` file, you get:
 
-- **Source code** in TypeScript, Python, Rust, Go, and C# — DTOs, data classes, discriminated unions, pattern-matchable enums — generated from the same definition, always in sync.
+- **Source code** in TypeScript, Python, Rust, Go, C#, and PHP — DTOs, data classes, discriminated unions, pattern-matchable enums — generated from the same definition, always in sync.
 - **SVG diagrams** with automatic orthogonal layout — no dragging, no fiddling, versionable in git.
-- **Round-trip conversion** from existing TypeScript/Python/Rust/Go/C# back to the DSL, so you can retrofit an existing codebase.
+- **Round-trip conversion** from existing TypeScript/Python/Rust/Go/C#/PHP back to the DSL, so you can retrofit an existing codebase.
 
 This is not a diagramming tool dressed up with a text input like Mermaid or PlantUML. typeDiagram is a **shared schema for your data model** — the diagram is a side effect, not the goal. The primary output is code, in as many languages as you need, kept strictly in sync by construction.
 

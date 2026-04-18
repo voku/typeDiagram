@@ -6,14 +6,14 @@
     "packages/typediagram": {
       "statements": 95,
       "branches": 90.76,
-      "functions": 98.5,
+      "functions": 98.57,
       "lines": 95
     },
     "packages/cli": {
-      "statements": 96.71,
+      "statements": 96.72,
       "branches": 97.16,
       "functions": 99,
-      "lines": 96.71
+      "lines": 96.72
     },
     "packages/web": {
       "statements": 95.43,

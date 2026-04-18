@@ -1,6 +1,6 @@
 // [WEB-RENDER-PANE] Pure function: source -> HTML string for the preview div.
 // Lazy-loads `typediagram` so the main chunk stays free of framework + ELK weight.
-import type { RenderHooks } from "typediagram-core";
+import type { Diagnostic, RenderHooks, Result } from "typediagram-core";
 
 const getTheme = () =>
   window.matchMedia("(prefers-color-scheme: dark)").matches ? ("dark" as const) : ("light" as const);
@@ -8,8 +8,15 @@ const getTheme = () =>
 export const renderPane = async (source: string, hooks?: RenderHooks): Promise<string> => {
   const { parser, renderToString } = await import("typediagram-core");
   const opts = { theme: getTheme(), ...(hooks ? { hooks } : {}) };
-  const result = await renderToString(source, opts);
-  return result.ok ? result.value : diagnosticsHtml(parser.formatDiagnostics([...result.error]));
+  // Safety: renderToString is typed as always returning a Result, but in tests the
+  // module mock may be reset to undefined during suite teardown. The widening cast
+  // allows a safe guard that prevents an unhandled rejection in that edge case.
+  const result = (await renderToString(source, opts)) as Result<string, Diagnostic[]> | undefined;
+  return result === undefined
+    ? ""
+    : result.ok
+      ? result.value
+      : diagnosticsHtml(parser.formatDiagnostics([...result.error]));
 };
 
 const diagnosticsHtml = (text: string): string => {
