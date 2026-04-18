@@ -89,6 +89,7 @@ describe("[CLI-ROUNDTRIP-EMIT] .td → language output", () => {
       lang: "typescript",
       markers: ["export interface User", "export interface Address"],
     },
+    { lang: "php", markers: ["final readonly class User", "final readonly class Address"] },
   ] as const)("--to $lang emits expected constructs", async ({ lang, markers }) => {
     const { code, stdout } = await run(["--to", lang, fixturePath("small.td")]);
     expect(code).toBe(0);
@@ -167,6 +168,7 @@ describe("[CLI-ROUNDTRIP-CROSS] source lang → .td → every target lang", () =
     { lang: "python", marker: "@dataclass" },
     { lang: "rust", marker: "pub struct" },
     { lang: "typescript", marker: "export interface" },
+    { lang: "php", marker: "final readonly class" },
   ] as const;
 
   for (const src of sources) {

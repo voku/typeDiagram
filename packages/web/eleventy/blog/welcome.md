@@ -12,7 +12,7 @@ If you searched for a **class diagram** tool for modern type systems, a way to *
 2. How do I **generate TypeScript, Rust, C#, F#, Go, or Python types** from one diagram?
 3. How do I get an **AI-assisted class diagram** that stays in sync with my codebase?
 
-The short answer: **typeDiagram**. It is a full diagram-as-code ecosystem — a tiny DSL for records and tagged unions, a parser, a layout engine, an SVG renderer with pluggable render hooks, a source generator for six languages, a Markdown plugin, a CLI, and a VS Code extension. Language-neutral, open source, and designed to slot into Markdown, VS Code, and MCP-based AI workflows.
+The short answer: **typeDiagram**. It is a full diagram-as-code ecosystem — a tiny DSL for records and tagged unions, a parser, a layout engine, an SVG renderer with pluggable render hooks, a source generator for seven languages — TypeScript, Rust, C#, F#, Go, Python, and PHP — a Markdown plugin, a CLI, and a VS Code extension. Language-neutral, open source, and designed to slot into Markdown, VS Code, and MCP-based AI workflows.
 
 ## Class diagrams for a post-OOP world
 
@@ -57,7 +57,7 @@ Mermaid and PlantUML are excellent, general-purpose diagram-as-code tools. Merma
 typeDiagram is **focused**. It does one thing: class diagrams for algebraic data types, end-to-end. That focus buys three things general UML renderers do not offer:
 
 - **First-class discriminated unions and tagged unions.** Variants and their payloads are a primitive in the DSL, not a workaround using inheritance or stereotype notes. The layout engine knows the difference between a variant-of edge and a reference edge.
-- **Source generation in six languages.** One diagram round-trips to idiomatic TypeScript, Rust, C#, F#, Go, and Python — and back. No general-purpose UML tool does this.
+- **Source generation in seven languages.** One diagram round-trips to idiomatic TypeScript, Rust, C#, F#, Go, Python, and PHP — and back. No general-purpose UML tool does this.
 - **Pluggable render hooks.** The SVG renderer exposes hooks at every stage — node, row, edge, background, post-render. Custom themes, overlays, hover interactions, annotations, and export pipelines plug in without forking.
 
 Pair them freely. Mermaid for sequence and flowchart, PlantUML for C4 and deployment, **typeDiagram for the type layer** that also generates your code.
@@ -110,7 +110,7 @@ All four consume the same public API. No duplicated parsing or layout logic. Wha
 
 ## "I already use Mermaid or PlantUML — do I need typeDiagram?"
 
-Add, don't switch. Keep Mermaid or PlantUML for sequence, flowchart, state, ER, C4, and deployment diagrams. Reach for typeDiagram when you want the **type layer** — the records, the discriminated unions, the domain model — to also generate code in six languages and to render through customisable hooks. They render side-by-side in the same Markdown file.
+Add, don't switch. Keep Mermaid or PlantUML for sequence, flowchart, state, ER, C4, and deployment diagrams. Reach for typeDiagram when you want the **type layer** — the records, the discriminated unions, the domain model — to also generate code in seven languages and to render through customisable hooks. They render side-by-side in the same Markdown file.
 
 ## Getting started in 60 seconds
 

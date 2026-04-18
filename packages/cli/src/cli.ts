@@ -17,6 +17,7 @@ const CONVERTER_MAP: Record<Lang, typeof converters.typescript> = {
   rust: converters.rust,
   go: converters.go,
   csharp: converters.csharp,
+  php: converters.php,
 };
 
 export const main = async (

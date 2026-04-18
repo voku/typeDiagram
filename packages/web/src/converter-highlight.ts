@@ -74,6 +74,19 @@ const CSHARP_RULES: readonly Rule[] = [
   { re: /[<>{}:;,=|?()[\]]/g, cls: "hl-punct" },
 ];
 
+const PHP_RULES: readonly Rule[] = [
+  { re: /\/\/.*$/gm, cls: "hl-comment" },
+  { re: /\/\*[\s\S]*?\*\//gm, cls: "hl-comment" },
+  {
+    re: /\b(final|readonly|class|interface|public|function|implements|declare|strict_types)\b/g,
+    cls: "hl-keyword",
+  },
+  { re: /\b(bool|int|float|string|array|mixed|void)\b/g, cls: "hl-builtin" },
+  { re: /\$([a-z_][A-Za-z0-9_]*)\b/g, cls: "hl-field", group: 1 },
+  { re: /\b([A-Z][A-Za-z0-9_]*)\b/g, cls: "hl-type" },
+  { re: /[<>{}:;,=|?()[\]$]/g, cls: "hl-punct" },
+];
+
 const FSHARP_RULES: readonly Rule[] = [
   { re: /\/\/.*$/gm, cls: "hl-comment" },
   { re: /\(\*[\s\S]*?\*\)/gm, cls: "hl-comment" },
@@ -90,7 +103,7 @@ const FSHARP_RULES: readonly Rule[] = [
   { re: /[<>{}:;,=|*()[\]]/g, cls: "hl-punct" },
 ];
 
-type SupportedLang = "typescript" | "rust" | "python" | "go" | "csharp" | "fsharp";
+type SupportedLang = "typescript" | "rust" | "python" | "go" | "csharp" | "fsharp" | "php";
 
 const LANG_RULES: Record<SupportedLang, readonly Rule[]> = {
   typescript: TYPESCRIPT_RULES,
@@ -99,6 +112,7 @@ const LANG_RULES: Record<SupportedLang, readonly Rule[]> = {
   go: GO_RULES,
   csharp: CSHARP_RULES,
   fsharp: FSHARP_RULES,
+  php: PHP_RULES,
 };
 
 type Span = { start: number; end: number; cls: string };

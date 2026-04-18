@@ -93,6 +93,20 @@ describe("[WEB-CONV-HIGHLIGHT] highlightLang()", () => {
     });
   });
 
+  describe("PHP", () => {
+    it("wraps readonly class keywords", () => {
+      const html = highlightLang("final readonly class Foo {}", "php");
+      expect(html).toContain('<span class="hl-keyword">readonly</span>');
+      expect(html).toContain('<span class="hl-keyword">class</span>');
+    });
+
+    it("wraps PHP builtins", () => {
+      const html = highlightLang("public string $name", "php");
+      expect(html).toContain('<span class="hl-builtin">string</span>');
+      expect(html).toContain('<span class="hl-field">name</span>');
+    });
+  });
+
   describe("F#", () => {
     it("wraps type keyword", () => {
       const html = highlightLang("type Foo = {}", "fsharp");
