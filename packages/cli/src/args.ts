@@ -3,7 +3,7 @@ import type { Result } from "./result.js";
 import { err, ok } from "./result.js";
 
 export type Theme = "light" | "dark";
-export type Lang = "typescript" | "python" | "rust" | "go" | "csharp";
+export type Lang = "typescript" | "python" | "rust" | "go" | "csharp" | "php";
 export type Emit = "svg" | "td" | "td+svg";
 
 export interface CliArgs {
@@ -21,7 +21,7 @@ export interface ArgError {
 }
 
 const THEMES: ReadonlySet<Theme> = new Set<Theme>(["light", "dark"]);
-const LANGS: ReadonlySet<Lang> = new Set<Lang>(["typescript", "python", "rust", "go", "csharp"]);
+const LANGS: ReadonlySet<Lang> = new Set<Lang>(["typescript", "python", "rust", "go", "csharp", "php"]);
 const EMITS: ReadonlySet<Emit> = new Set<Emit>(["svg", "td", "td+svg"]);
 
 const isTheme = (v: string): v is Theme => THEMES.has(v as Theme);
@@ -114,11 +114,11 @@ const applyLang = (
   key: "from" | "to"
 ): Result<true, ArgError> =>
   v === null
-    ? err({ message: `--${key} expects typescript|python|rust|go|csharp` })
+    ? err({ message: `--${key} expects typescript|python|rust|go|csharp|php` })
     : isLang(v)
       ? ((s[key] = v), ok(true as const))
       : err({
-          message: `--${key} expects typescript|python|rust|go|csharp, got ${v}`,
+          message: `--${key} expects typescript|python|rust|go|csharp|php, got ${v}`,
         });
 
 const applyEmit = (v: string | null, s: { emit: Emit }): Result<true, ArgError> =>
@@ -134,8 +134,8 @@ Usage:
   typediagram [options] [file]
 
 Options:
-  --from typescript|python|rust|go|csharp   Convert from language source to SVG
-  --to   typescript|python|rust|go|csharp   Convert from typeDiagram to language source
+  --from typescript|python|rust|go|csharp|php   Convert from language source to SVG
+  --to   typescript|python|rust|go|csharp|php   Convert from typeDiagram to language source
   --emit svg|td|td+svg              Output format for --from (default: svg)
   --theme light|dark                 Color theme (default: light)
   --font-size N                      Font size in px

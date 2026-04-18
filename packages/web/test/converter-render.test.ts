@@ -18,6 +18,7 @@ vi.mock("typediagram-core", () => ({
     go: { fromSource: mockFromSource, toSource: mockToSource, language: "go" },
     csharp: { fromSource: mockFromSource, toSource: mockToSource, language: "csharp" },
     fsharp: { fromSource: mockFromSource, toSource: mockToSource, language: "fsharp" },
+    php: { fromSource: mockFromSource, toSource: mockToSource, language: "php" },
   },
   model: { printSource: mockPrintSource, buildModel: mockBuildModel },
   renderToString: mockRenderToString,

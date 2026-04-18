@@ -25,12 +25,12 @@ describe("[WEB-CONVERTER] mountConverter()", () => {
     document.body.appendChild(container);
   });
 
-  it("renders language tabs for all 6 languages", async () => {
+  it("renders language tabs for all 7 languages", async () => {
     mountConverter(container);
     await vi.dynamicImportSettled();
 
     const tabs = Array.from(container.querySelectorAll<HTMLElement>(".conv-lang-tab"));
-    expect(tabs.length).toBe(6);
+    expect(tabs.length).toBe(7);
 
     const labels: (string | null)[] = tabs.map((t: HTMLElement) => t.textContent);
     expect(labels).toContain("TypeScript");
@@ -39,6 +39,7 @@ describe("[WEB-CONVERTER] mountConverter()", () => {
     expect(labels).toContain("Go");
     expect(labels).toContain("C#");
     expect(labels).toContain("F#");
+    expect(labels).toContain("PHP");
   });
 
   it("sets TypeScript as the default active tab", () => {

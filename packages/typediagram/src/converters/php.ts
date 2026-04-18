@@ -78,29 +78,23 @@ const unwrapOptionType = (type: ResolvedTypeRef) => type.args[0] ?? type;
 const usesGenericType = (type: ResolvedTypeRef, generics: ReadonlySet<string>): boolean =>
   generics.has(type.name) || type.args.some((arg) => usesGenericType(arg, generics));
 
-const splitGenericArgs = (source: string): string[] => {
-  const parts: string[] = [];
-  let depth = 0;
-  let start = 0;
-  for (let i = 0; i < source.length; i++) {
-    const char = source.charAt(i);
-    depth += char === "<" ? 1 : char === ">" ? -1 : 0;
-    if (char === "," && depth === 0) {
-      parts.push(source.slice(start, i).trim());
-      start = i + 1;
-    }
+const adjustDepth = (depth: number, char: string, openChar: string, closeChar: string) => {
+  if (char === openChar) {
+    return depth + 1;
   }
-  const last = source.slice(start).trim();
-  return last.length > 0 ? [...parts, last] : parts;
+  if (char === closeChar) {
+    return depth - 1;
+  }
+  return depth;
 };
 
-const splitParams = (source: string): string[] => {
+const splitTopLevel = (source: string, openChar: string, closeChar: string): string[] => {
   const parts: string[] = [];
   let depth = 0;
   let start = 0;
   for (let i = 0; i < source.length; i++) {
     const char = source.charAt(i);
-    depth += char === "(" ? 1 : char === ")" ? -1 : 0;
+    depth = adjustDepth(depth, char, openChar, closeChar);
     if (char === "," && depth === 0) {
       const part = source.slice(start, i).trim();
       if (part.length > 0) {
@@ -112,6 +106,10 @@ const splitParams = (source: string): string[] => {
   const last = source.slice(start).trim();
   return last.length > 0 ? [...parts, last] : parts;
 };
+
+const splitGenericArgs = (source: string) => splitTopLevel(source, "<", ">");
+
+const splitParams = (source: string) => splitTopLevel(source, "(", ")");
 
 const mapTdToPhpDocType = (type: ResolvedTypeRef): string => {
   if (type.name === "List" && type.args[0] !== undefined) {
@@ -173,7 +171,9 @@ const renderDocblock = (lines: readonly string[], indent = "") =>
   lines.length === 0 ? [] : [`${indent}/**`, ...lines.map((line) => `${indent} * ${line}`), `${indent} */`];
 
 const renderConstructor = (params: readonly RenderedParam[], bodyLines: readonly string[]) => {
-  const docLines = params.filter((param) => param.docType !== null).map((param) => `@param ${param.docType} $${param.name}`);
+  const docLines = params
+    .filter((param) => param.docType !== null)
+    .map((param) => `@param ${param.docType} $${param.name}`);
   const renderedDoc = renderDocblock(docLines, "    ");
   const renderedParams = params.map(
     (param) => `        public ${param.nativeType} $${param.name}${param.hasDefaultNull ? " = null" : ""},`
@@ -190,7 +190,9 @@ const renderConstructor = (params: readonly RenderedParam[], bodyLines: readonly
 
   return [
     ...renderedDoc,
-    ...(renderedParams.length === 0 ? ["    public function __construct()"] : ["    public function __construct(", ...renderedParams, "    )"]),
+    ...(renderedParams.length === 0
+      ? ["    public function __construct()"]
+      : ["    public function __construct(", ...renderedParams, "    )"]),
     "    {",
     ...bodyLines.map((line) => `        ${line}`),
     "    }",
@@ -200,7 +202,11 @@ const renderConstructor = (params: readonly RenderedParam[], bodyLines: readonly
 const sortFields = <T extends { type: ResolvedTypeRef }>(items: readonly T[]) =>
   [...items].sort((left, right) => Number(isOptionType(left.type)) - Number(isOptionType(right.type)));
 
-const renderRecord = (name: string, generics: readonly string[], fields: readonly { name: string; type: ResolvedTypeRef }[]) => {
+const renderRecord = (
+  name: string,
+  generics: readonly string[],
+  fields: readonly { name: string; type: ResolvedTypeRef }[]
+) => {
   const genericSet = new Set(generics);
   const params = sortFields(fields).map((field) => ({ name: field.name, ...getPhpTypeSpec(field.type, genericSet) }));
   return [
@@ -212,22 +218,27 @@ const renderRecord = (name: string, generics: readonly string[], fields: readonl
   ].join("\n");
 };
 
-const renderUnion = (name: string, generics: readonly string[], variants: readonly { name: string; fields: readonly { name: string; type: ResolvedTypeRef }[] }[]) => {
+const renderUnion = (
+  name: string,
+  generics: readonly string[],
+  variants: readonly { name: string; fields: readonly { name: string; type: ResolvedTypeRef }[] }[]
+) => {
   const genericSet = new Set(generics);
   const blocks: string[] = [
-    [
-      ...renderDocblock(generics.map((generic) => `@template ${generic}`)),
-      `interface ${name}`,
-      "{",
-      "}",
-    ].join("\n"),
+    [...renderDocblock(generics.map((generic) => `@template ${generic}`)), `interface ${name}`, "{", "}"].join("\n"),
   ];
 
   for (const variant of variants) {
     const variantUsesGeneric = variant.fields.some((field) => usesGenericType(field.type, genericSet));
-    const params = sortFields(variant.fields).map((field) => ({ name: field.name, ...getPhpTypeSpec(field.type, genericSet) }));
+    const params = sortFields(variant.fields).map((field) => ({
+      name: field.name,
+      ...getPhpTypeSpec(field.type, genericSet),
+    }));
     const classDoc = variantUsesGeneric
-      ? renderDocblock([...generics.map((generic) => `@template ${generic}`), `@implements ${name}<${generics.join(", ")}>`])
+      ? renderDocblock([
+          ...generics.map((generic) => `@template ${generic}`),
+          `@implements ${name}<${generics.join(", ")}>`,
+        ])
       : [];
     blocks.push(
       [
@@ -267,14 +278,20 @@ const toPhp = (model: Model): string => {
     }
     return [renderAlias(decl.name, decl.generics, decl.target)];
   });
-  return ["<?php", "", "declare(strict_types=1);", "", ...blocks.flatMap((block, index) => (index === 0 ? [block] : ["", block])), ""].join("\n");
+  return [
+    "<?php",
+    "",
+    "declare(strict_types=1);",
+    "",
+    ...blocks.flatMap((block, index) => (index === 0 ? [block] : ["", block])),
+    "",
+  ].join("\n");
 };
 
 const findMatchingDelimiter = (source: string, openIndex: number, openChar: string, closeChar: string) => {
   let depth = 0;
   for (let index = openIndex; index < source.length; index++) {
-    const char = source.charAt(index);
-    depth += char === openChar ? 1 : char === closeChar ? -1 : 0;
+    depth = adjustDepth(depth, source.charAt(index), openChar, closeChar);
     if (depth === 0) {
       return index;
     }
@@ -388,7 +405,8 @@ const mapPhpDocTypeToTd = (docType: string): string => {
   return PHP_TO_TD[trimmed] ?? trimmed;
 };
 
-const toTypeRef = (param: ParsedParam) => parseTypeRef(param.docType === null ? mapPhpNativeTypeToTd(param.nativeType) : mapPhpDocTypeToTd(param.docType));
+const toTypeRef = (param: ParsedParam) =>
+  parseTypeRef(param.docType === null ? mapPhpNativeTypeToTd(param.nativeType) : mapPhpDocTypeToTd(param.docType));
 
 const parseKindLiteral = (body: string) => /@var\s+'([^']+)'[\s\S]*?public string \$kind;/.exec(body)?.[1] ?? null;
 
@@ -403,7 +421,11 @@ const fromPhp = (source: string): Result<Model, Diagnostic[]> => {
   const variantNames = new Set<string>();
 
   for (const declaration of declarations) {
-    if (declaration.declType !== "class" || declaration.implementsName === null || !interfaces.has(declaration.implementsName)) {
+    if (
+      declaration.declType !== "class" ||
+      declaration.implementsName === null ||
+      !interfaces.has(declaration.implementsName)
+    ) {
       continue;
     }
     const kindLiteral = parseKindLiteral(declaration.body);
@@ -414,7 +436,10 @@ const fromPhp = (source: string): Result<Model, Diagnostic[]> => {
     variantNames.add(declaration.name);
     variantMap.set(declaration.implementsName, [
       ...(variantMap.get(declaration.implementsName) ?? []),
-      { name: declaration.name, fields: constructor.params.map((param) => ({ name: param.name, type: toTypeRef(param) })) },
+      {
+        name: declaration.name,
+        fields: constructor.params.map((param) => ({ name: param.name, type: toTypeRef(param) })),
+      },
     ]);
   }
 
@@ -450,7 +475,13 @@ const fromPhp = (source: string): Result<Model, Diagnostic[]> => {
     }
 
     found = true;
-    builder.add(record(declaration.name, constructor.params.map((param) => ({ name: param.name, type: toTypeRef(param) })), generics));
+    builder.add(
+      record(
+        declaration.name,
+        constructor.params.map((param) => ({ name: param.name, type: toTypeRef(param) })),
+        generics
+      )
+    );
   }
 
   return found ? builder.build() : err(NO_SUPPORTED_DEFINITIONS);

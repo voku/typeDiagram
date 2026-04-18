@@ -262,6 +262,49 @@ type UriKind =
     | Web
     | Api
 `,
+  php: `<?php
+
+declare(strict_types=1);
+
+final readonly class ChatRequest
+{
+    /**
+     * @param list<ToolResult> $tool_results
+     */
+    public function __construct(
+        public string $message,
+        public string $session_id,
+        public array $tool_results,
+    ) {}
+}
+
+final readonly class ToolResult
+{
+    public function __construct(
+        public string $tool_call_id,
+        public string $name,
+        public string $content,
+        public bool $ok,
+    ) {}
+}
+
+interface ContentItem
+{
+}
+
+final readonly class Text implements ContentItem
+{
+    /** @var 'Text' */
+    public string $kind;
+
+    public function __construct(
+        public string $value,
+    )
+    {
+        $this->kind = 'Text';
+    }
+}
+`,
 };
 
 const TD_SAMPLE = `typeDiagram
@@ -319,9 +362,10 @@ const LANG_LABELS: Record<SupportedLang, string> = {
   go: "Go",
   csharp: "C#",
   fsharp: "F#",
+  php: "PHP",
 };
 
-const LANGUAGES: readonly SupportedLang[] = ["typescript", "rust", "python", "go", "csharp", "fsharp"];
+const LANGUAGES: readonly SupportedLang[] = ["typescript", "rust", "python", "go", "csharp", "fsharp", "php"];
 
 let currentLang: SupportedLang = "typescript";
 let flipped = false;

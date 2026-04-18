@@ -90,6 +90,11 @@ describe("[CLI-ARGS] parseArgs", () => {
     expect(r.ok && r.value.to).toBe("rust");
   });
 
+  it("parses --from php", () => {
+    const r = parseArgs(["--from", "php"]);
+    expect(r.ok && r.value.from).toBe("php");
+  });
+
   it("rejects --from and --to together", () => {
     const r = parseArgs(["--from", "typescript", "--to", "rust"]);
     expect(r.ok).toBe(false);
